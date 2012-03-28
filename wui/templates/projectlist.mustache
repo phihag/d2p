@@ -1,0 +1,12 @@
+
+<div class="commandbar">
+<div class="commandbutton button_addproject">Create Project</div>
+</div>
+
+<ul class="projects">
+{{#projects}}
+    <li><a href="#/p/{{idstr}}/">{{name}}</a></li>
+{{/projects}}
+</ul>
+
+<script src="/static/projectlist.js"></script>

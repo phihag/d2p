@@ -1,0 +1,19 @@
+
+{{#dtn_endpoints}}
+
+<div class="dtn_endpoint" data-endpoint-id="{{id}}" data-active="{{#active}}true{{/active}}{{^active}}false{{/active}}">
+
+<div class="endpoint_info">
+<div class="endpoint_name">{{name}} ({{os_id}})</div>
+<div class="endpoint_serial">{{serial}}</div>
+</div>
+
+{{#active}}
+<div class="commandbutton button_dtn_disable">Disable</div>
+{{/active}}
+{{^active}}
+<div class="commandbutton button_dtn_enable">Enable</div>
+{{/active}}
+
+</div>
+{{/dtn_endpoints}}

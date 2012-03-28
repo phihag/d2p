@@ -1,0 +1,58 @@
+
+<div class="p2p_overview">
+
+<h2>General Information</h2>
+
+<table>
+<tbody>
+<tr><th>Port: </th><td>{{serverPort}}</td></tr>
+</tbody>
+</table>
+
+<h2>Endpoints</h2>
+
+<table class="p2p_endpoints">
+<thead><tr><th>Port</th><th>Remote</th></tr></thead>
+<tbody>
+
+{{#endpoints}}
+<tr>
+<td>{{localPort}}</td>
+<td>{{remoteAddr}}</td>
+</tr>
+{{/endpoints}}
+</tbody>
+</table>
+
+<h2>Bootstraps</h2>
+
+{{#bootstraps}}
+<div class="p2p_bootstrap" data-bootstrap-id="{{id}}" data-bootstrap-type="{{type}}">
+<h3 title="{{type}}">{{name}}-{{id}}</h3>
+
+<table class="p2p_bootstrap_entries">
+<thead>
+<tr><th>transport</th><th>address</th><th>Port</th></tr>
+</thead>
+<tbody>
+
+{{#entries}}
+<tr><td>{{transportId}}</td><td>{{addr}}</td><td>{{port}}</td></tr>
+{{/entries}}
+
+</tbody>
+</table>
+
+</div>
+{{/bootstraps}}
+
+<form id="p2p_bootstrap_addform">
+<select id="p2p_bootstrap_type">
+<option value="manual">Manual</option>
+</select>
+<input type="submit" value="Add bootstrap" />
+</form>
+
+</div>
+
+<script src="/static/transport-p2p.js"></script>

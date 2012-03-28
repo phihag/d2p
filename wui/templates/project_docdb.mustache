@@ -1,0 +1,21 @@
+{{>ProjectHeader_cono}}
+
+<div class="docdb_view">
+
+<table>
+<thead>
+<tr><th>Document ID</th><th>Revisions</th><th>Newest document</th></tr>
+</thead>
+<tbody>
+{{#docdb}}
+<tr>
+<th title="{{id}}">{{id_short}}..</th>
+<td>{{allrevs_str}}</td>
+<td class="docdb_rawdata">{{data_str}}</td>
+</tr>
+{{/docdb}}
+</tbody>
+</table>
+
+</div>
+

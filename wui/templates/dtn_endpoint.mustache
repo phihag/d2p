@@ -1,0 +1,31 @@
+
+<div class="commandbar">
+<div class="commandbutton button_to_dtnlist">Back to Transport Overview</div>
+</div>
+
+<div class="dtn_endpoint_detail">
+
+{{>dtn_tile_endpointInfo}}
+
+<h2>Projects</h2>
+
+<ul class="dtn_endpoint_projects">
+{{#endpoint_projects}}
+<li title="{{id}}" data-project-id="{{id}}"><span>{{name}}</span>
+{{^locallyAvailable}}<div class="commandbutton button_dtn_import_project">Import</div>{{/locallyAvailable}}</li>
+{{/endpoint_projects}}
+</ul>
+
+<form class="dtn_endpoint_projects">
+<select id="dtn_endpoint_project_selection">
+{{#unadded_projects}}
+<option value="{{id}}">{{name}}</option>
+{{/unadded_projects}}
+</select>
+<input type="submit" value="Add Project" />
+</form>
+
+
+</div>
+
+<script src="/static/transport-dtn.js"></script>

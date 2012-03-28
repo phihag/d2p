@@ -1,0 +1,78 @@
+
+html,body{margin: 0; padding: 0; font-family: sans-serif;}
+
+h1.indialog {text-align: center; margin: 0; padding: 0;}
+
+#actions {position: absolute; right: 1em;}
+.commandbutton {font-size:200%; cursor: pointer;}
+.commandbutton:hover {outline: 1px solid #ccf; background-color: #eef;}
+
+.commandbar {padding: 0.3em 1em; background: #f8f8f8; color: #000;}
+.commandbar>.commandbutton{display: inline-block; margin: 0 0.3em;}
+.commandbar>.commandbutton:first-child{margin-left: 0;}
+.commandbar>.commandbutton_disabled {color: #bbb; background: #eee;}
+
+.button_actions {background: url("icons/actions.png") no-repeat; background-position: 0 center; padding-left: 34px;}
+
+#pingResultPanel {position: absolute; right: 1em; bottom: 0em;}
+.pingResults {margin: 0; padding: 0;}
+.pingResults>li {list-style-type: none; font-size: 150%; background-repeat: no-repeat; background-position: 0 center; padding-left: 26px;}
+.pingResults>li[data-state="loading"] {color: #666; background-image: url("icons/status-loading.gif");}
+.pingResults>li[data-state="online"] {color: #030; background-image: url("icons/status-online.png"); cursor: pointer;}
+.pingResults>li[data-state="offline"] {color: #500; background-image: url("icons/status-offline.png"); cursor: not-allowed;}
+.pingResults>li[data-state="disabled"] {color: #600;background-image: url("icons/status-disabled.png"); cursor: not-allowed;}
+.pingResults>li[data-state="online"]:hover {background-color: #eef;}
+
+.dialog {border: 2px solid #369; position: relative; background: #fff;}
+.dialog_title {background: #69c; color: #fafafa; font-size: 160%; padding-left: 0.4em; cursor: default; padding-right: 1.2em;}
+.dialog_close {position: absolute; right: 0; top: 0; font-size: 220%; margin: -0.6em -0.2em 0 0; padding: 0.4em 0.4em 0.4em 1em; color: #fafafa; cursor: pointer;}
+.dialog_close:hover {color: #c24;}
+.dialog_content {padding: 0.2em 0.4em 0 0.4em;}
+
+.dialog_center_wrapper {position: absolute; position: fixed; text-align: center; top: 10%; left: 0; width: 100%;}
+.dialog_center_wrapper>.dialog {display: inline-block; text-align: left;}
+
+.rangedisplay {padding-right: 0.6em;}
+
+.settingsField>* {vertical-align: middle;}
+
+.settings_label_bold {font-weight: bold;}
+.settings_label_boldnl {font-weight: bold; display: block;}
+
+#switchNote_dialog {position: fixed; left: 0; bottom: 0;}
+#switchNote {font-size: 150%; padding: 0.4em 0.4em;}
+
+.cas_view {margin: 1em 0 0 1em; width: 90%;}
+.cas_view th {font-family: monospace; font-weight: bold; font-size: 160%; padding-right: 0.7em; vertical-align: top;}
+.cas_view td {font-family: monospace; font-size: 160%; white-space: pre-wrap;}
+
+.docdb_view {margin: 1em 0 0 1em; width: 90%;}
+.docdb_rawdata {font-family: monospace; white-space: pre-wrap;}
+.docdb_view table {border-collapse: collapse;}
+.docdb_view td, .docdb_view th {border-top: 1px solid #000; border-bottom: 1px solid #000;}
+.docdb_view td {padding: 0.2em 0.5em;}
+
+.cono_proposals,.cono_proposal,.cono_comments {padding: 0.2em 0 0 1em;}
+.cono_proposal_title,.cono_proposal_description {width: 80%; max-width: 80em; margin: 0; padding: 0;}
+.cono_proposal_title {white-space: no-wrap; font-size: 1.5em;}
+.cono_proposal_description {white-space: pre-wrap;}
+.cono_proposals_proposal {margin-bottom: 0.8em;}
+textarea.cono_proposal_description {font: inherit; margin-top: 0.5em; display: block;}
+.cono_proposal_rev_current {font-style: italic;}
+
+.viewlink {cursor: pointer; color: #00578A;}
+.viewlink p {color: #000;}
+.viewlink:hover {text-decoration: underline;}
+
+.dtn_endpoints{margin: 1em 0 0 1em;}
+.dtn_endpoint[data-active="false"] .endpoint_info {color: #888;}
+.dtn_endpoint .endpoint_info {display: inline-block; padding-right: 1em;}
+.dtn_endpoint .commandbutton {display: inline-block; vertical-align: top;}
+.endpoint_name {font-size: 140%; font-weight: bold;}
+
+.dtn_endpoint_detail{margin: 1em 0 0 1em;}
+.dtn_endpoint_projects li span{font-size: 1.8em; padding-right: 0.5em;}
+.dtn_endpoint_projects .commandbutton {display: inline-block;}
+
+.p2p_overview{margin: 1em 0 0 1em;}
+#p2p_bootstrap_addform {margin-top: 1.5em;}

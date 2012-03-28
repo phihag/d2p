@@ -1,0 +1,29 @@
+{{>ProjectHeader_cono}}
+
+{{#proposal}}
+<div class="cono_proposal" data-proposal-id="{{_id}}" data-proposal-title="{{title}}" data-proposal-description="{{description}}" data-proposal-rev="{{_rev}}" data-proposal-revisions_json="{{_revisions_json}}">
+<h2 class="cono_proposal_title">{{title}}</h2>
+<p class="cono_proposal_description">{{description}}</p>
+</div>
+
+<div class="commandbar">
+<div class="commandbutton project_proposal_edit_button">Edit</div>
+<div class="commandbutton project_proposal_revisions_button"">{{_revisions_str}}</div>
+</div>
+{{/proposal}}
+
+<div class="cono_comments">
+<h2>Comments</h2>
+
+{{#comments}}
+<p>
+{{text}}
+</p>
+{{/comments}}
+
+<form id="cono_commentform">
+<textarea class="cono_comment_text" cols="50" rows="4"></textarea>
+<input type="submit" value="Comment" />
+</form>
+
+</div>
