@@ -1,3 +1,10 @@
+correct naming scheme for templates
+lecture module
+create chapters
+edit slides
+display slides / export
+
+Separate frontend from main app
 Show local IP address in LAN tab
 Notify on any change
 Notify on DTN insertion
@@ -30,5 +37,5 @@ ZipFileBased DTN CAS
 teaching platform
     students get to comment on-slide, but not content
     slide editor
-        export to PDF (incl. comments)
+        export to HTML, PDF (incl. comments)
 

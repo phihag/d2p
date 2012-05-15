@@ -13,7 +13,9 @@ def load(parentDir):
     with open(os.path.join(parentDir, 'projecttype'), 'r') as typef:
         ptype = typef.read()
     pclass = _ptypeMap[ptype]
-    return pclass.load(parentDir)
+    res = pclass.load(parentDir)
+    assert res.ptype == ptype
+    return res
 
 def loadVirtualProject(parentDir):
     """ Load a project from a DTN medium """
@@ -25,8 +27,9 @@ def loadVirtualProject(parentDir):
 
 def createReal(netCore, parentDir, ptype, name):
     """ parentDir is the directory where the project and its database should be stored in """
-    assert ptype == 'coop-norms' # TODO this seems wrong, fix creation screen
-    return CoopNormsProject.createReal(netCore, parentDir, name)
+
+    pcls = _ptypeMap[ptype]
+    return pcls.createReal(netCore, parentDir, name)
 
 def _genKeyPair():
     return (b'private key', b'public key ' + struct.pack('!I', random.SystemRandom().getrandbits(32)))
@@ -268,10 +271,10 @@ class DocDBProject(CASBasedProject):
 class CoopNormsProject(DocDBProject):
     ptype = 'cono'
 
-    @staticmethod
-    def create(name, cas=None):
+    @classmethod
+    def create(cls, name, cas=None):
         privKey,pubKey = _genKeyPair()
-        res = CoopNormsProject(name, pubKey, privKey, cas=cas)
+        res = cls(name, pubKey, privKey, cas=cas)
         return res
 
     @classmethod
@@ -285,18 +288,50 @@ class CoopNormsProject(DocDBProject):
         res.netCore = netCore
         return res
 
-    @staticmethod
-    def load(projectDir):
+    @classmethod
+    def load(cls, projectDir):
         pargs = Project._def_load(projectDir)
-        res = CoopNormsProject(*pargs)
+        res = cls(*pargs)
         cas = FilesystemCAS(os.path.join(projectDir, 'cas'))
         cas.load(initIfNotThere=False)
         res.cas = cas
         res._initAppDB()
         return res
 
+class LectureProject(DocDBProject):
+    ptype = 'lecture'
+
+    @classmethod
+    def create(cls, name, cas=None):
+        privKey,pubKey = _genKeyPair()
+        res = cls(name, pubKey, privKey, cas=cas)
+        return res
+
+    @classmethod
+    def createReal(cls, netCore, parentDir, name):
+        res = cls.create(name)
+        projectDir = os.path.join(parentDir, res.idstr)
+        res.save(projectDir, initIfNotThere=True)
+        cas = FilesystemCAS(os.path.join(projectDir, 'cas'))
+        cas.load(initIfNotThere=True)
+        res.cas = cas
+        res.netCore = netCore
+        return res
+
+    @classmethod
+    def load(cls, projectDir):
+        pargs = Project._def_load(projectDir)
+        res = cls(*pargs)
+        cas = FilesystemCAS(os.path.join(projectDir, 'cas'))
+        cas.load(initIfNotThere=False)
+        res.cas = cas
+        res._initAppDB()
+        return res
+   
+
 _ptypeMap = {
-    CoopNormsProject.ptype: CoopNormsProject
+    CoopNormsProject.ptype: CoopNormsProject,
+    LectureProject.ptype: LectureProject,
 }
 
 _ptypeMapVirtual = {

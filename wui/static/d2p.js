@@ -532,9 +532,11 @@ content_show: function() {
         dataType: 'json',
         success: function(data) {
             $('#content').html(data.contenthtml);
+            $('body>header').toggle(!data.hideHeader);
             var titleH1 = $('body>header>h1');
-            titleH1.text(data.title + ' - ' + titleH1.attr('data-title'));
-            document.title = data.title;
+            var title = data.title + ' - ' + titleH1.attr('data-title');
+            titleH1.text(title);
+            document.title = title;
         }
     });
 },
@@ -573,5 +575,5 @@ d2p.ui_init();
 d2p.ui_showSwitchNote();
 d2p.content_init();
 
-d2p.setupAutoPing();
+//d2p.setupAutoPing(); // TODO Disabled for debugging, improve it so that it's nicer
 });
