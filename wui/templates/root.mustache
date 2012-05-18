@@ -1,7 +1,26 @@
-{{>header}}
+<!DOCTYPE html>
+<html manifest-disabled-TODO="/manifest">
+<head>
+<meta charset="utf-8" />
+<title>{{title}}</title>
+<link rel="stylesheet" href="/static/d2p.css" />
+{{{headers}}
+</head>
+<body data-configJSON="{{configJSON}}">
+<nav id="actions"></nav>
+
+<header>
+    <h1 data-title="{{title}}">{{title}}</h1>
+</header>
+
+<script src="/static/jquery-1.7.1.min.js"></script>
+<script src="/static/underscore-min.js"></script>
+<script src="/static/d2p.js"></script>
+{{!TODO:  Move scripts to the bottom by not ever including them in HTML. Instead, they should be rendered otherwise.}}
 
 <div id="content">
-Loading content ...
+{{{content}}}
 </div>
 
-{{>footer}}
+</body>
+</html>

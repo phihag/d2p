@@ -21,6 +21,9 @@ checkBrowser: function() {
     if (typeof window.applicationCache == 'undefined') {
         alert("This browser does not support offline Web Applications");
     }
+    if (typeof window.history.pushState == 'undefined') {
+        alert("This browser does not support the history API");
+    }
 },
 i18n: function(s) {
     return s;
@@ -526,40 +529,12 @@ ui_showSwitchNote: function() {
     }, 8000);
 },
 
-content_show: function() {
-    var vpath = window.location.hash.substring(1);
-    $.ajax(vpath, {
-        dataType: 'json',
-        success: function(data) {
-            $('#content').html(data.contenthtml);
-            $('body>header').toggle(!data.hideHeader);
-            var titleH1 = $('body>header>h1');
-            var title = data.title + ' - ' + titleH1.attr('data-title');
-            titleH1.text(title);
-            document.title = title;
-        }
-    });
-},
 content_curUrl: function() {
-    if (window.location.hash) {
-        return window.location.hash.substring(1);
-    }
-    return '/';
+    return location.href; // TODO deprecate
 },
 content_goto: function(vpath) {
-    var hvpath = '#' + vpath;
-    if (window.location.hash != hvpath) {
-        window.location.hash = hvpath;
-    } else {
-        d2p.content_show();
-    }
-},
-content_init: function() {
-    if (! window.location.hash) {
-        window.location.hash = '#/p/';
-    }
-    d2p.content_show(window.location.hash);
-    $(window).bind('hashchange', d2p.content_show);
+    location.href = vpath;
+    // TODO use history API
 }
 
 };
@@ -573,7 +548,6 @@ d2p.usersettings_init();
 d2p.usersettings_load();
 d2p.ui_init();
 d2p.ui_showSwitchNote();
-d2p.content_init();
 
 //d2p.setupAutoPing(); // TODO Disabled for debugging, improve it so that it's nicer
 });

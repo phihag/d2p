@@ -60,6 +60,9 @@ h1.indialog {text-align: center; margin: 0; padding: 0;}
 textarea.cono_proposal_description {font: inherit; margin-top: 0.5em; display: block;}
 .cono_proposal_rev_current {font-style: italic;}
 
+.lecture_chapters>li {list-style-type: none;}
+
+
 .viewlink {cursor: pointer; color: #00578A;}
 .viewlink p {color: #000;}
 .viewlink:hover {text-decoration: underline;}
@@ -76,3 +79,5 @@ textarea.cono_proposal_description {font: inherit; margin-top: 0.5em; display: b
 
 .p2p_overview{margin: 1em 0 0 1em;}
 #p2p_bootstrap_addform {margin-top: 1.5em;}
+
+

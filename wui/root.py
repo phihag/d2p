@@ -8,25 +8,7 @@ from . import templating
 
 class RootHandler(tornado.web.RequestHandler):
     def get(self):
-        serverName = self.request.host
-        localPort = self.request.connection.stream.socket.getsockname()[1]
-        serverId = self.request.protocol + '://' + self.request.host
-
-        fallbacks = [
-                {"urlbase": "http://normsetzung1.phihag.de", "name": "normsetzung1.phihag.de"},
-                {"urlbase": "http://normsetzung2.phihag.de", "name": "normsetzung2.phihag.de"},
-                {"urlbase": "http://localhost:2180", "name": "localhost:2180"}
-            ]
-        fallbacks = list(filter(lambda h: h['urlbase'] != serverId, fallbacks))
-
-        clientConfig = {
-            "serverName": serverName,
-            "fallbacks": fallbacks
-        }
-        self.write(templating.render('root', {
-            'title': 'd2p on ' + serverName,
-            'configJSON': json.dumps(clientConfig),
-        }))
+        self.redirect('/p/')
 
 class ManifestHandler(tornado.web.RequestHandler):
     def initialize(self, staticFileInfo=None, templateFileInfo=None):
@@ -36,6 +18,7 @@ class ManifestHandler(tornado.web.RequestHandler):
         self._templateFileInfo = templateFileInfo
 
     def get(self):
+        raise ValueError('TODO: disabled for now, will need CHROMIUM-INTERCEPT style')
         self.set_header('Content-Type', 'text/cache-manifest')
         self.write(self.getManifest())
 

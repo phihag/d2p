@@ -1,9 +1,13 @@
-correct naming scheme for templates
-lecture module
-create chapters
+render the application, use history API
+accept header
+create chapter
+master slides / slide types
 edit slides
-display slides / export
+display slides
+audio track
+export to static HTML / zip file
 
+correct naming scheme for templates
 Separate frontend from main app
 Show local IP address in LAN tab
 Notify on any change
