@@ -398,8 +398,6 @@ ui_init: function() {
     togglePanelButton.text(d2p.i18n('Actions'));
     togglePanelButton.click(d2p.ui_toggleControlPanel);
     $('#actions').append(togglePanelButton);
-
-    togglePanelButton.click();
 },
 _ui_uniqId: 0,
 /*

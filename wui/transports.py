@@ -8,7 +8,8 @@ class DTNHandler(TemplatingHandler):
 
         dct = {
             'template': 'dtn_list',
-            'title': 'DTN endpoints'
+            'title': 'DTN endpoints',
+            'scripts': [{'src': '/static/transport-dtn.js'}],
         }
         dct['dtn_endpoints'] = list(dtnTransport.ui_listEndpointInfo())
         self.render(dct)
@@ -41,7 +42,8 @@ class DTNEndpointHandler(TemplatingHandler):
             'template': 'dtn_endpoint',
             'unadded_projects': unadded_projectsInfo,
             'endpoint_projects': endpoint_projectsInfo,
-            'title': epInfo['name'] + ' (' + epInfo['os_id'] + ') - DTN endpoint'
+            'title': epInfo['name'] + ' (' + epInfo['os_id'] + ') - DTN endpoint',
+            'scripts': [{'src': '/static/transport-dtn.js'}],
         }
         self.render(dct)
 
@@ -94,7 +96,8 @@ class P2PHandler(TemplatingHandler):
             'endpoints': endpoints,
             'serverPort': p2pTransport.ui_serverPort,
             'title': 'P2P transport',
-            'template': 'p2p_overview'
+            'template': 'p2p_overview',
+            'scripts': [{'src': '/static/transport-p2p.js'}]
         }
         self.render(dct)
 
@@ -123,3 +126,5 @@ class P2PManualBootstrapHandler(TemplatingHandler): # Add and configure a manual
         bse = d2p.core.bootstrap.BootstrapEntry(*args)
 
         bs.ui_addEntry(bse)
+        self.write({'_status': added})
+

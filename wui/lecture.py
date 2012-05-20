@@ -6,6 +6,10 @@ class _LectureProjectHandler(_ProjectHandler):
         assert self.p.ptype == 'lecture'
         self.pdict['hideHeader'] = True
         self.pdict['showUI'] = True
+        self.pdict.get('scripts', []).extend([
+            {'src': '/static/lecture.js'},
+            {'src': '/static/lecture_admin.js'},
+        ])
 
 class LectureProjectShowHandler(_LectureProjectHandler):
     def get(self, projectId):

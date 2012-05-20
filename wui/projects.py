@@ -5,6 +5,17 @@ import json
 import time
 import tornado.web
 
+def getProjectUrl(project):
+    return '/p/' + project.idstr + '/' + project.ptype + '/'
+
+def getProjectDict(project):
+    return {
+        'name': project.name,
+        'idstr': project.idstr,
+        'ptype': project.ptype,
+        'baseurl': getProjectUrl(project)
+    }
+
 class _ProjectHandler(TemplatingHandler):
     def init(self, projectId):
         pm = self.application.project_manager
@@ -15,19 +26,18 @@ class _ProjectHandler(TemplatingHandler):
 
         self.p = p
 
-        dct = {'name': p.name, 'idstr': p.idstr, 'ptype': p.ptype, 'baseurl': self.getProjectUrl(p)}
+        dct = getProjectDict(p)
         self.pdict = {'project': dct}
-
-    def getProjectUrl(self, project):
-        return '/p/' + project.idstr + '/' + project.ptype + '/'
 
 class ListProjectsHandler(TemplatingHandler):
     def get(self):
         pm = self.application.project_manager
-        pdct = [{'idstr': p.idstr, 'name': p.name, 'ptype': p.ptype} for p in pm]
-        dct = {'projects': pdct}
-        dct['template'] = 'projectlist'
-        dct['title'] = 'Projects'
+        pdct = list(map(getProjectDict, pm))
+        dct = {
+            'projects': pdct,
+            'template': 'projectlist',
+            'title': 'Projects',
+            'scripts': [{'src':'/static/projectlist.js'}]}
         self.render(dct)
 
 class CreateProjectHandler(tornado.web.RequestHandler):
@@ -39,5 +49,5 @@ class CreateProjectHandler(tornado.web.RequestHandler):
         pm = self.application.project_manager
         p = pm.createReal(ptype, pname)
         pm.add(p)
-        self.write({'url': self.getProjectUrl(p)})
+        self.write({'url': getProjectUrl(p)})
 

@@ -4,6 +4,7 @@ import json
 class _ConoProjectHandler(_ProjectHandler):
     def init(self, projectId):
         super(_ConoProjectHandler, self).init(projectId)
+        self.pdict['scripts'] = [{'src': '/static/project-cono.js'}]
         assert self.p.ptype == 'cono'
 
 class ProjectCASHandler(_ConoProjectHandler):
@@ -29,6 +30,8 @@ class ConoProjectShowHandler(_ConoProjectHandler):
         dct['template'] = 'project_cono_show'
         dct['title'] = self.p.name
         dct['proposals'] = list(self.p.view_newest(lambda e: e['type'] == 'proposal'))
+        assert dct['project']['baseurl'].endswith('/')
+        assert not dct['project']['baseurl'].endswith('//')
         self.render(dct)
 
 class ConoProposalHandler(_ConoProjectHandler):

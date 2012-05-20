@@ -76,6 +76,7 @@ def _findMime(acceptHeader, supported, default=None):
 class TemplatingHandler(tornado.web.RequestHandler):
     def render(self, data):
         assert 'template' in data
+        assert 'title' in data
 
         def renderJSON(includeHTML, data):
             if includeHTML:
@@ -104,18 +105,22 @@ class TemplatingHandler(tornado.web.RequestHandler):
                 "fallbacks": fallbacks
             }
             self.write(render('root', {
-                'title': 'd2p on ' + serverName,
+                'title': data['title'],
                 'configJSON': json.dumps(clientConfig),
-                'content': contentHtml
+                'content': contentHtml,
+                'scripts': data.get('scripts', []),
             }))
 
         formats = {
+            'json': functools.partial(renderJSON, True),
             'application/json': functools.partial(renderJSON, True),
             'application/json;includeHTML=true': functools.partial(renderJSON, True),
             'application/json;includeHTML=false': functools.partial(renderJSON, False),
             'text/html': renderHtml,
+            'html': renderHtml,
         }
 
-        mt = _findMime(self.request.headers.get('Accept'), formats, 'text/html')
+        reqFormat = self.get_argument('format', self.request.headers.get('Accept'))
+        mt = _findMime(reqFormat, formats, 'text/html')
         formats[mt](data)
 
