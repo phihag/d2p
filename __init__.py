@@ -21,6 +21,7 @@ def readOpts():
     parser.add_option('--start-webbrowser-new', dest='start_webbrowser_new', help='Start a webbrowser in a new "tab", "window", or in the "same" browser window', default="tab", metavar='tab|window|same')
     parser.add_option('--webui-port', dest='webui_port', help='Run the webbrowser on the specified port (0 for random)', metavar='PORT')
     parser.add_option('--webui-public', action='store_true', dest='webui_public', help='Serve to all IPs')
+    parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Extended output')
     opts,args = parser.parse_args()
 
     return opts
@@ -49,9 +50,14 @@ def _readConfig(opts):
     if opts.autoreload is not None:
         cfg['autoreload'] = opts.autoreload
 
+    if opts.verbose is not None:
+        cfg['verbose'] = True
+
     return cfg
 
-def _setupAutoreload(io_loop):
+def _setupAutoreload(cfg, io_loop):
+    if not cfg.get('autoreload', False):
+        return 
     import tornado.autoreload
 
     _EXCLUDE = ['libs', '.git', 'test']
@@ -66,6 +72,10 @@ def _setupAutoreload(io_loop):
                 dirnames.remove(exclude)
             except ValueError:
                 pass # Exclusion list didn't match
+    if cfg.get('verbose'):
+        def _onReload():
+            print('Reloading ...')
+        tornado.autoreload.add_reload_hook(_onReload)
     tornado.autoreload.start(io_loop)
 
 def main():
@@ -74,8 +84,7 @@ def main():
     cfg = _readConfig(opts)
 
     io_loop = tornado.ioloop.IOLoop()
-    if cfg.get('autoreload', False):
-        _setupAutoreload(io_loop)
+    _setupAutoreload(cfg, io_loop)
     netCore = core.NetworkCore(io_loop, cfg)
     projectManager = core.ProjectManager(cfg, netCore)
     netCore.projectManager = projectManager

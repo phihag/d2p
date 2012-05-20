@@ -1,5 +1,6 @@
 from .projects import _ProjectHandler
 import json
+import time
 
 class _ConoProjectHandler(_ProjectHandler):
     def init(self, projectId):
@@ -35,6 +36,9 @@ class ConoProjectShowHandler(_ConoProjectHandler):
         self.render(dct)
 
 class ConoProposalHandler(_ConoProjectHandler):
+    def _proposal_url(self, proposalId, revId=None):
+        return self.pdict['project']['baseurl'] + proposalId + ('@' + revId if revId else '') + '/'
+    
     def get(self, projectId, proposalId, revId=None): # Show one specific proposal
         self.init(projectId)
 
@@ -42,6 +46,7 @@ class ConoProposalHandler(_ConoProjectHandler):
         if len(proposal['_revisionIds']) > 1:
             proposal['_revisions_str'] = str(len(proposal['_revisionIds'])) + ' revisions'
         proposal['_revisions_json'] = json.dumps(proposal['_revisionIds'])
+        proposal['baseurl'] = self._proposal_url(proposalId)
 
         dct = self.pdict
         dct['proposal'] = proposal
@@ -69,8 +74,7 @@ class ConoProposalHandler(_ConoProjectHandler):
         proposal = self.p.local_add(proposalData)
 
         dct = self.pdict
-        dct['proposal_url'] = '/p/' + self.p.idstr + '/' + proposal['_id'] + '/'
-        dct['proposal_rev'] = proposal['_rev']
+        dct['url'] = self._proposal_url(proposal['_id'], proposal['_rev'])
         self.write(dct)
 
 class ConoCommentHandler(_ConoProjectHandler):
@@ -86,7 +90,7 @@ class ConoCommentHandler(_ConoProjectHandler):
             'time': time.time()
         }
         self.p.local_add(commentData)
-
+        self.write({'_status': '_added'})
 
 class ProjectDocumentDBHandler(_ConoProjectHandler):
     def get(self, projectId):
@@ -114,7 +118,7 @@ def routes(prefix):
         (prefix + r"/cas/", ProjectCASHandler),
         (prefix + r"/docdb/", ProjectDocumentDBHandler),
         (prefix + r"/([0-9a-f]+)/", ConoProposalHandler),
-        (prefix + r"/([0-9a-f]+)/rev_([0-9a-f]+)/", ConoProposalHandler),
+        (prefix + r"/([0-9a-f]+)@([0-9a-f]+)/", ConoProposalHandler),
         (prefix + r"/([0-9a-f]+)/submitComment", ConoCommentHandler),
         (prefix + r"/submitProposal", ConoProposalHandler),
     ]

@@ -42,7 +42,8 @@ $(function() {
         submit.appendTo(form);
 
         var dlg;
-        form.bind('submit', function() {
+        form.bind('submit', function(e) {
+            e.preventDefault();
             var url = d2p.project.get_baseUrl() + 'submitProposal';
             var request = d2p._ui_getFormValues(form);
 
@@ -75,17 +76,19 @@ $(function() {
         saveButton.attr({value: d2p.i18n('Save Proposal')});
         saveButton.appendTo(form);
 
-        form.bind('submit', function() {
+        form.bind('submit', function(e) {
+            e.preventDefault();
             var proposalData = {
                 'title': $('.cono_proposal_title').val(),
                 'description': $('.cono_proposal_description').val()
             };
             var proposalId = $('.cono_proposal').attr('data-proposal-id');
             var url = d2p.project.get_baseUrl() + proposalId + '/';
+
             d2p.sendQuery(url, proposalData, function(res) {
-                var purl = res['proposal_url'] + 'rev_' + res['proposal_rev'] + '/';
-                d2p.content_goto(purl);
+                d2p.content_goto(res.url);
             });
+            console.log("Sent query ...");
         });
 
         proposalEl.children().remove();
@@ -131,12 +134,12 @@ $(function() {
         
     });
     
-    $('#cono_commentform').submit(function() {
+    $('#cono_commentform').submit(function(e) {
+        e.preventDefault();
         var commentData = {
             'text': $('.cono_comment_text').val(),
         };
-        var proposalId = $('.cono_proposal').attr('data-proposal-id');
-        var proposalUrl = d2p.project.get_baseUrl() + proposalId + '/';
+        var proposalUrl = $('.cono_proposal').attr('data-proposal-baseurl');
         var url = proposalUrl + 'submitComment';
 
         d2p.sendQuery(url, commentData, function() {

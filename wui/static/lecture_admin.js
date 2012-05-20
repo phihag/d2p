@@ -15,7 +15,8 @@ $('.lecture_newChapter').click(function() {
     submit.appendTo(form);
 
     var dlg;
-    form.bind('submit', function() {
+    form.bind('submit', function(e) {
+        e.preventDefault();
         var url = lecture.getBaseURL() + 'chapter/';
         var request = d2p._ui_getFormValues(form);
 
@@ -24,8 +25,6 @@ $('.lecture_newChapter').click(function() {
             var url = res['url'];
             d2p.content_goto(url);
         });
-
-        return false;
     });
     dlg = d2p._ui_makeCenterDialog(form, 'Create a new proposal');
 });

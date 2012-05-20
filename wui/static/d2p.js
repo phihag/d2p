@@ -528,7 +528,7 @@ ui_showSwitchNote: function() {
 },
 
 content_curUrl: function() {
-    return location.href; // TODO deprecate
+    return window.location.pathname; // TODO deprecate
 },
 content_goto: function(vpath) {
     location.href = vpath;
