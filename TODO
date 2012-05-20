@@ -16,6 +16,7 @@ If requests 404 or 500, display error message
 Use one websocket for communication (incl. autoping)!
 Write a pseudo transport that just logs everything incoming, let us wrap that over existing transports
 
+test without JavaScript, make it happen
 Implement HTTP bootstrap
 Implement IP multicast bootstrap
 Remove dedicated ProjectManager, should be just called projects

@@ -109,6 +109,7 @@ class TemplatingHandler(tornado.web.RequestHandler):
                 'configJSON': json.dumps(clientConfig),
                 'content': contentHtml,
                 'scripts': data.get('scripts', []),
+                'hideHeader': data.get('hideHeader', False),
             }))
 
         formats = {

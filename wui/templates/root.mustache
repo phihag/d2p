@@ -9,9 +9,11 @@
 <body data-configJSON="{{configJSON}}">
 <nav id="actions"></nav>
 
+{{^hideHeader}}
 <header>
     <h1 data-title="{{title}}">{{title}}</h1>
 </header>
+{{/hideHeader}}
 
 <div id="content">
 {{{content}}}
