@@ -14,6 +14,7 @@ from . import core
 
 def readOpts():
     parser = optparse.OptionParser(description='Censorship-resistant distributed collaboration')
+    parser.add_option('-A', '--autoreload', action='store_true', default=None, dest='autoreload', help='Reload when a file gets changed')
     parser.add_option('-d', '--data-dir', dest='datadir', help='D2P data directory', default='~/.d2p', metavar='DIR')
     parser.add_option('--print-url', action='store_true', dest='print_url', help='Print URL of the web interface')
     parser.add_option('-w', '--start-webbrowser', action='store_true', dest='start_webbrowser', help='Start a webbrowser')
@@ -45,7 +46,27 @@ def _readConfig(opts):
     if opts.webui_public:
         cfg.setdefault('web', {})['addrs'] = ['::', '0.0.0.0']
 
+    if opts.autoreload is not None:
+        cfg['autoreload'] = opts.autoreload
+
     return cfg
+
+def _setupAutoreload(io_loop):
+    import tornado.autoreload
+
+    _EXCLUDE = ['libs', '.git', 'test']
+    rootDir = os.path.dirname(__file__)
+    for dirpath,dirnames,filenames in os.walk(rootDir, topdown=True):
+        tornado.autoreload.watch(dirpath)
+        for f in filenames:
+            if f.endswith('.py'):
+                tornado.autoreload.watch(os.path.join(dirpath, f))
+        for exclude in _EXCLUDE:
+            try:
+                dirnames.remove(exclude)
+            except ValueError:
+                pass # Exclusion list didn't match
+    tornado.autoreload.start(io_loop)
 
 def main():
     opts = readOpts()
@@ -53,6 +74,8 @@ def main():
     cfg = _readConfig(opts)
 
     io_loop = tornado.ioloop.IOLoop()
+    if cfg.get('autoreload', False):
+        _setupAutoreload(io_loop)
     netCore = core.NetworkCore(io_loop, cfg)
     projectManager = core.ProjectManager(cfg, netCore)
     netCore.projectManager = projectManager

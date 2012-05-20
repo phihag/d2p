@@ -12,7 +12,7 @@ class WebUI(object):
         portSpec = webCfg.get('port', 2180)
         addrs = webCfg.get('addrs', ['::1', '127.0.0.1'])
 
-        self._application = tornado.web.Application(routes, debug=cfg.get('debug', False))
+        self._application = tornado.web.Application(routes)
         self._application.project_manager = project_manager
         self._application.netCore = netCore
 

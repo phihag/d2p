@@ -1,6 +1,5 @@
 proposal edit location is broken
 fix current location (gray buttons in cono)
-order JS, styles
 create chapter
 master slides / slide types
 edit slides
@@ -8,7 +7,6 @@ display slides
 audio track
 export to static HTML / zip file
 
-Automatic restart (with Tornado)
 render the application with history API
     don't forget scripts
 correct naming scheme for templates
