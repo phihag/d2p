@@ -3,7 +3,7 @@
 import setup_tests
 import unittest
 
-import d2p.wui.templating    
+import d2p.wui.templating
 
 class TestWUI(unittest.TestCase):
     def test_templating_parseAccept(self):

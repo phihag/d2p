@@ -15,6 +15,8 @@ download-libs:
 
 	./util/getgit.sh git://github.com/phihag/py3stache.git libs/py3stache
 
+	./util/getgit.sh git://github.com/janl/mustache.js.git libs/mustache.js
+
 clean-libs:
 	rm -rf libs
 

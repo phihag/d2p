@@ -3,7 +3,7 @@ html,body{margin: 0; padding: 0; font-family: sans-serif;}
 
 h1.indialog {text-align: center; margin: 0; padding: 0;}
 
-#actions {position: absolute; right: 1em;}
+#actions {position: absolute; right: 1em; z-index: 100;}
 .commandbutton {font-size:200%; cursor: pointer;}
 .commandbutton:hover {outline: 1px solid #ccf; background-color: #eef;}
 

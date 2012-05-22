@@ -257,6 +257,13 @@ class DocDBProject(CASBasedProject):
         return res
 
     def local_add(self, data):
+        _ALLOWED_UNDERSCORES = ['_id', '_rev']
+        for k in data:
+            if k in _ALLOWED_UNDERSCORES:
+                continue
+            if k.startswith('_'):
+                raise ValueError('Reserved key ' + repr(k) + ' in local data input')
+
         if '_id' not in data:
             data['_id'] = hashlib.sha256(self.serialize(data)).hexdigest()
         if '_rev' not in data:

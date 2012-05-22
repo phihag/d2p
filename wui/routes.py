@@ -20,13 +20,14 @@ routes = ([
         ('/', _STATIC_PATH, ('favicon.ico',)),
     },
     'templateFileInfo': {
-        ('/templates/', templating.TEMPLATE_PATH, ('*.mustache')),
+        ('/templates/', templating.TEMPLATE_PATH, ('*.mustache',)),
     },
     }),
     (r"/ping", PingHandler),
     (r"/wsping", WSPingHandler),
     (r"/static/(.*)", StaticFileHandler, {'path': _STATIC_PATH}),
     (r"/(favicon\.ico)", StaticFileHandler, {'path': _STATIC_PATH}),
+    (r"/templates/(.*)", StaticFileHandler, {'path': templating.TEMPLATE_PATH}),
     (r"/p/", ListProjectsHandler),]
     + cono_projects.routes(r"/p/([0-9a-f]+)/cono")
     + lecture.routes(r"/p/([0-9a-f]+)/lecture")

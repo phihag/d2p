@@ -1,6 +1,7 @@
-create chapter
-master slides / slide types
+use new pystache
+include templates on server side to JavaScript
 edit slides
+masters?
 display slides
 audio track
 export to static HTML / zip file

@@ -60,18 +60,6 @@ def _setupAutoreload(cfg, io_loop):
         return 
     import tornado.autoreload
 
-    _EXCLUDE = ['libs', '.git', 'test']
-    rootDir = os.path.dirname(__file__)
-    for dirpath,dirnames,filenames in os.walk(rootDir, topdown=True):
-        tornado.autoreload.watch(dirpath)
-        for f in filenames:
-            if f.endswith('.py'):
-                tornado.autoreload.watch(os.path.join(dirpath, f))
-        for exclude in _EXCLUDE:
-            try:
-                dirnames.remove(exclude)
-            except ValueError:
-                pass # Exclusion list didn't match
     if cfg.get('verbose'):
         def _onReload():
             print('Reloading ...')

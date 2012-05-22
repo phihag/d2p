@@ -13,7 +13,9 @@ def _getTemplateCode(template_name):
         return tf.read()
 
 def render(template_name, context):
-    return _PystacheTemplate(_getTemplateCode(template_name), context).render()
+    templateCode = _getTemplateCode(template_name)
+    tmpl = _PystacheTemplate(templateCode, context)
+    return tmpl.render()
 
 class _PystacheTemplate(pystache.Template):
     def __init__(self, *args, **kwargs):
@@ -108,6 +110,7 @@ class TemplatingHandler(tornado.web.RequestHandler):
                 'title': data['title'],
                 'configJSON': json.dumps(clientConfig),
                 'content': contentHtml,
+                'stylesheets': data.get('stylesheets', []),
                 'scripts': data.get('scripts', []),
                 'hideHeader': data.get('hideHeader', False),
             }))
