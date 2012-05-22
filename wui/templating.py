@@ -11,7 +11,7 @@ TEMPLATE_PATH = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__
 class TemplateLoader(object):
     def get(self, template_name):
         fn = os.path.normpath(os.path.join(TEMPLATE_PATH, template_name + '.mustache'))
-        if not fn.startswith(TEMPLATE_PATH):
+        if not fn.startswith(TEMPLATE_PATH + os.path.sep):
             raise ValueError('Invalid template name')
 
         with open(os.path.join(fn), 'r') as tf:
