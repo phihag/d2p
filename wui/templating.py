@@ -6,26 +6,23 @@ import pystache
 import tornado.web
 import re
 
-TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+TEMPLATE_PATH = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 
-def _getTemplateCode(template_name):
-    with open(os.path.join(TEMPLATE_PATH, template_name + '.mustache'), 'r') as tf:
-        return tf.read()
+class TemplateLoader(object):
+    def get(self, template_name):
+        fn = os.path.normpath(os.path.join(TEMPLATE_PATH, template_name + '.mustache'))
+        if not fn.startswith(TEMPLATE_PATH):
+            raise ValueError('Invalid template name')
+
+        with open(os.path.join(fn), 'r') as tf:
+            return tf.read()
+    read = get
+    load_name = get
 
 def render(template_name, context):
-    templateCode = _getTemplateCode(template_name)
-    tmpl = _PystacheTemplate(templateCode, context)
-    return tmpl.render()
-
-class _PystacheTemplate(pystache.Template):
-    def __init__(self, *args, **kwargs):
-        super(_PystacheTemplate, self).__init__(*args, **kwargs)
-        self.modifiers.set('>')(_PystacheTemplate._render_partial)
-
-    def _render_partial(self, template_name):
-        markup = _getTemplateCode(template_name)
-        template = _PystacheTemplate(markup, self.view)
-        return template.render()
+    renderer = pystache.Renderer(string_encoding='utf-8', partials=TemplateLoader())
+    renderer._make_loader = TemplateLoader
+    return renderer.render_path(template_name, context)
 
 def _parseAccept(acceptHeader):
     """ Returns a sorted list of MIME types in order of preference.
