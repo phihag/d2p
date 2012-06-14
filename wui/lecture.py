@@ -12,6 +12,7 @@ class _LectureProjectHandler(_ProjectHandler):
         self.pdict['hideHeader'] = True
         self.pdict['showUI'] = True
         self.pdict.setdefault('scripts', []).extend([
+            {'src': '/static/lecture/mustache.js'},
             {'src': '/static/lecture/lecture.js'},
             {'src': '/static/lecture_admin.js'},
         ])
@@ -35,7 +36,7 @@ class _LectureProjectHandler(_ProjectHandler):
             if ext != '.mustache':
                 continue
             with open(os.path.join(templateDir, fn)) as f:
-                res[base] = f.read()
+                res['lecture/' + base] = f.read()
         return res
 
 class LectureProjectShowHandler(_LectureProjectHandler):
@@ -50,19 +51,21 @@ class LectureProjectShowHandler(_LectureProjectHandler):
             c['_url'] = self.genChapterUrl(c['_id'])
         self.render(dct)
 
-class _LectureCRUDHandler(_LectureProjectHandler):
-    """ Subclasses must implement genUrl, and set _TYPE and _KEYS """
-
+class ChapterHandler(_LectureProjectHandler):
     def post(self, projectId, eId=None): # None: new entry
         self.init(projectId)
 
         d = {
-            'type': self._TYPE
+            'type': 'chapter'
         }
-        for k in self._KEYS:
+        for k in ['name']:
             v = self.get_argument(k, None)
             assert v
             d[k] = v
+        slidesJSON = self.get_argument('slidesJSON', None)
+        if not slidesJSON:
+            slidesJSON = '[]'
+        d['slides'] = json.loads(slidesJSON)
 
         if eId:
             d['_id'] = eId
@@ -70,15 +73,9 @@ class _LectureCRUDHandler(_LectureProjectHandler):
         e = self.p.local_add(d)
 
         dct = self.pdict
-        dct['url'] = self.genUrl(e['_id'])
+        dct['url'] = self.genChapterUrl(e['_id'])
         self.write(dct)
 
-class ChapterHandler(_LectureCRUDHandler):
-    _KEYS = ['name']
-    _TYPE = 'chapter'
-
-    def genUrl(self, eId):
-        return self.genChapterUrl(eId)
 
     def get(self, projectId, eId, revId=None):
         self.init(projectId)
@@ -87,8 +84,7 @@ class ChapterHandler(_LectureCRUDHandler):
         e = self.p.getEntry(eId, revId)
         dct['template'] = 'lecture/chapter-javascript'
         dct['title'] = e['name'] + ' - ' + self.p.name
-        e['_slides'] = list(self.p.view_newest(lambda e: e['type'] == 'slide' and e.get('chapter') == eId))
-        e['_lectureName'] = self.pdict['project']['name']
+        e['_lecture'] = self.pdict['project']
         dct['chapter'] = e
         dct['chapterJSON'] = json.dumps(e, indent=4)
         dct['templatesJSON'] = json.dumps(self.getLectureTemplates())

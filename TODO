@@ -1,10 +1,12 @@
-use new pystache
-include templates on server side to JavaScript
+content rendering with lists
+new slide
+scale slide font
 edit slides
-masters?
-display slides
+content format for sublists and stuff
+display only one slide at a time
 audio track
 export to static HTML / zip file
+include slide numbers with CSS or JS?
 
 render the application with history API
     don't forget scripts
@@ -22,8 +24,8 @@ Implement HTTP bootstrap
 Implement IP multicast bootstrap
 Remove dedicated ProjectManager, should be just called projects
 Add a revision control type on top of ptype
-DTN: KDE integration; one action should be "go to URL and make it a d2p drive"
 XSRF protection
+DTN: KDE integration; one action should be "go to URL and make it a d2p drive"
 support HEAD requests
 sendQuery should have status notification
 Actually implement cryptographic stuff
@@ -39,8 +41,9 @@ UI:
 Use mDNS for fallback into local LAN
 ZipFileBased DTN CAS
 
-teaching platform
+lecture
     students get to comment on-slide, but not content
-    slide editor
-        export to HTML, PDF (incl. comments)
+    export to HTML, PDF (incl. comments), video
+    presentation mode (fullscreen / multi-screen API)
+
 

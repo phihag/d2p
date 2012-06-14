@@ -114,6 +114,7 @@ class TemplatingHandler(tornado.web.RequestHandler):
 
         formats = {
             'json': functools.partial(renderJSON, True),
+            'rawjson': functools.partial(renderJSON, False),
             'application/json': functools.partial(renderJSON, True),
             'application/json;includeHTML=true': functools.partial(renderJSON, True),
             'application/json;includeHTML=false': functools.partial(renderJSON, False),
