@@ -1,15 +1,66 @@
 
-#lecture_container {width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #fafafa; color: #000;}
-.lecture_slide {position: relative; border-top: 1px solid #aaa; margin: 0 auto; padding: 0.8em 0; background: #fff;}
-.lecture_slide h1, .lecture_slide h2 {margin: 0; padding: 0;}
+#lecture_container {width: 100%; height: 100%; position: absolute; top: 0; left: 0;}
+.lecture_slide {
+    position: relative;
+    border-top: 1px solid #aaa;
+    margin: 0 auto; padding: 0.8em 0;
+    background: #fff; color: #000;
+    font-family: "Nimbus Sans L",sans-serif; font-size: 28pt;
+}
+.lecture_slide ul ul ul li {font-size: 22pt;}
+
+.lecture_slide :first{border-top: none;}
+.lecture_slide h1 {
+    margin: 16px 0 0 10px; padding: 8px 8px; height: 46px;
+    display: inline-block;
+    font-size: 30pt; font-weight: normal;
+    color: #3333b2;
+}
 
 .lecture_frontSlide {min-height: 8em;}
 .lecture_frontSlide h2 {font-size: 200%; position: absolute; top: 25%; width: 100%; text-align: center;}
 .lecture_frontSlide h1 {font-size: 300%; position: absolute; top: 52%; text-align: center; width: 100%;}
 
-.lecture_admin_placeholder {color: #999;}
+.lecture_slide ul {
+    padding-left: 40px;
+    margin-top: 0; margin-bottom: 0;
+}
+.lecture_slide ul li {
+    color: #000;
+    list-style-type: none;
+}
+.lecture_slide ul li:before {
+    content: '\2022 ';
+    color: #006ab3;
+    padding-right: 12px;
+}
+.lecture_slide_contentContainer {
+    display: table; table-layout: fixed;
+    position: absolute; top: 78px; left:0; width: 100%; height: /* 768 - 78 - 32 */ 658px;
+}
+.lecture_slide_content {
+    display: table-cell;
+    vertical-align: middle;
+    width: 100%; height: 100%;
+    padding-left: 40px;
+}
+.lecture_slide>footer {
+    position: absolute;
+    height: 32px; width: 100%; left:0; bottom: 0; background: #adade0;
+    line-height: 32px; vertical-align: middle;
+    font-size: 16px; font-weight: lighter;
+    color: #444;
+    padding-left: 18px;
+}
+
+.lecture_admin_placeholder {color: #bbb !important;}
 
 @media screen,interactive {
-    .lecture_slide_active {border: none; padding: 0;}
+    #lecture_container {background: #fbfbfb; background: #000;}
+    .lecture_slide_active {border: none; padding: 0; overflow: hidden;}
     .lecture_slide_inactive {display: none;}
+}
+
+@media print {
+    .lecture_slide>footer{background: #fff; outline-top: 1px solid #888;}
 }

@@ -122,7 +122,6 @@ lecture._scale = function() {
     var HEIGHT = 768;
 
     var _applyScale = function(scale) {
-        console.log("scaling to " + scale);
         var $slide = $('.lecture_slide_active');
         $slide.css({
             '-webkit-transform': 'scale(' + scale + ')',
@@ -154,6 +153,8 @@ lecture._scale = function() {
  * Returns a jQuery object.
  */
 lecture.renderSlide = function(sdata, chapterData) {
+    _assert(sdata);
+    _assert(chapterData);
     var $res = $('<div class="lecture_slide">');
 
     var $title = $("<h1>");
@@ -163,7 +164,7 @@ lecture.renderSlide = function(sdata, chapterData) {
     var types = {};
     types.list = function(d) {
         var ul = document.createElement("ul");
-        _assert(d.items);
+        _assert(d.items, 'A list must have an "items" property');
         d.items.forEach(function(its) {
             var li = document.createElement("li");
             _assert($.isArray(its), 'List items must consist of a sequence of element descriptions', [its]);
@@ -186,15 +187,24 @@ lecture.renderSlide = function(sdata, chapterData) {
         return func(d);
     };
 
-    var $contentContainer = $('<div class="lecture_contentContainer">');
+    var $contentContainer = $('<div class="lecture_slide_contentContainer">');
+    var $contentWrapper = $('<div class="lecture_slide_content">');
     if (sdata.content) {
         _assert ($.isArray(sdata.content), 'content must be an array (or undefined)'); 
         sdata.content.forEach(function(cdata) {
             var $content = $(render(cdata));
-            $contentContainer.append($content);
+            $contentWrapper.append($content);
         });
     }
-    $contentContainer.appendTo($res);
+    $contentContainer.append($contentWrapper);
+    $res.append($contentContainer);
+    
+    var $footer = $('<footer>');
+    var $footerTitle = $('<span class="lecture_footer_title">');
+    $footer.text(chapterData._lecture.name + ' \u2014 ' + chapterData.name);
+    $footer.text("Peer-To-Peer-Systeme \u2014 Organisatorisches");
+    $footer.append($footerTitle);
+    $res.append($footer);
     return $res;
 };
 
@@ -257,7 +267,7 @@ lecture.admin.getBaseURL = function() {
 
 lecture.admin.makeNewSlide = function() {
     var slideData = {};
-    var $slide = lecture.renderSlide(slideData, lecture.data);
+    var $slide = lecture.renderSlide(slideData, lecture.admin._data);
     lecture.admin._setSlideData($slide, slideData);
     lecture.admin.makeSlideEditable($slide);
     dataEl.append($slide);
@@ -303,17 +313,34 @@ if (dataEl.length > 0) {
     var lectureData = JSON.parse(dataJSON);
     lectureData['slides'] = [
         {'title': 'First slide',
-            content: [{type: 'list', 'items': [
+            content: [
+            {type: 'text', 'text': 'Hier beginnt eine normale Aufzählung'},
+            {type: 'list', 'items': [
+                [{'type': "text", "text": "XXXXX"}],
                 [{'type': "text", "text": "Hello"}],
                 [{'type': "text", "text": "world"}],
                 [{'type': "text", "text": "Hi"}],
-                [{type: 'list', 'items': [
+                [{'type': "text", "text": "This is a"},
+                 {type: 'list', 'items': [
                     [{'type': "text", "text": "sub"}],
-                    [{'type': "text", "text": "list"}]
-                ]}]
+                    [{'type': "text", "text": "list"},
+                        {type: 'list', items: [
+                            [{'type': "text", "text": "dritte"}],
+                            [{'type': "text", "text": "Ebene"}]
+                        ]}
+                    ]
+                 ]}
+                ]
             ]}]},
-        {'title': 'Second slide'}
+        {'title': 'Second slide'},
+        {'title': 'Mindest-Verteilungszeit Peer-To-Peer',
+        content: [
+            {type:'list', items:[
+                [{'type': "text", "text": "Dateigröße F(in Bit)"}]
+            ]}
+        ]}
     ];
+    lecture.admin._data = lectureData;
     lecture.admin.displayChapter(lectureData);
 
     lecture.admin.makeNewSlide();
