@@ -1,4 +1,6 @@
 
+body {counter-reset: lecture_slidenum 0;}
+
 #lecture_container {width: 100%; height: 100%; position: absolute; top: 0; left: 0;}
 .lecture_slide {
     position: relative;
@@ -6,6 +8,7 @@
     margin: 0 auto; padding: 0.8em 0;
     background: #fff; color: #000;
     font-family: "Nimbus Sans L",sans-serif; font-size: 28pt;
+    counter-increment: lecture_slidenum;
 }
 .lecture_slide ul ul ul li {font-size: 22pt;}
 
@@ -52,6 +55,8 @@
     color: #444;
     padding-left: 18px;
 }
+.lecture_footer_slidenum {position: absolute; right: 30px;}
+.lecture_footer_slidenum:after {content: counter(lecture_slidenum);}
 
 .lecture_admin_placeholder {color: #bbb !important;}
 

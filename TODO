@@ -1,13 +1,16 @@
-bottom line: page numbers
+edit lists
+tab should indent, shift+tab dedent
+keyboard nav (cursors from title)
+save edited stuff
 new slide
-edit slides
 content format for sublists and stuff
 display only one slide at a time
 audio track
 export to static HTML / zip file
-include slide numbers with CSS or JS?
-
-render the application with history API
+fix printing
+when switching slides in edit mode, 
+indication for edit mode (Present button or so)
+next and prev slide with mouse application with history API
     don't forget scripts
 correct naming scheme for templates
 Separate frontend from main app
