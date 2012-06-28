@@ -19,10 +19,15 @@ body {counter-reset: lecture_slidenum 0;}
     font-size: 30pt; font-weight: normal;
     color: #3333b2;
 }
+.lecture_slide :focus {outline: none;}
 
 .lecture_frontSlide {min-height: 8em;}
-.lecture_frontSlide h2 {font-size: 200%; position: absolute; top: 25%; width: 100%; text-align: center;}
-.lecture_frontSlide h1 {font-size: 300%; position: absolute; top: 52%; text-align: center; width: 100%;}
+.lecture_frontSlide h2 {font-size: 180%; position: absolute; top: 25%; width: 100%; text-align: center;}
+.lecture_frontSlide h1 {font-size: 220%; position: absolute; top: 52%; text-align: center; width: 100%;}
+
+#lecture_statusContainer {position: absolute; bottom: 0; right: 0;}
+#lecture_statusContainer>div {background: #777; background: rgba(127, 127, 127, 0.93); color: #fff; font-size: 15pt; padding: 10px 15px;}
+#lecture_statusContainer>div:first-child {border-top-left-radius: 10px;}
 
 .lecture_slide ul {
     padding-left: 40px;

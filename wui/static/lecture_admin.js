@@ -54,31 +54,56 @@ lecture.present = function(initialSlideNum) {
     $(window).bind('resize', lecture._scale);
 };
 
+lecture.hintStatus = function(msg) {
+    var $container = $('#lecture_statusContainer');
+    if ($container.length == 0) {
+        $container = $('<div id="lecture_statusContainer"></div>');
+        dataEl.append($container);
+    }
+
+    var $field = $('<div></div>');
+    $field.text(msg);
+    $field.appendTo($container);
+    window.setTimeout(function() {
+        var FADE_LENGTH = 1000;
+        $field.fadeOut(FADE_LENGTH, function() {
+            $field.remove();
+        });
+        $field.next().animate({'border-top-left-radius': 10}, FADE_LENGTH);
+    }, 1500);
+};
+
+lecture.keyHooks = {};
+
 lecture._onKeyDown = function(ev) {
     if (ev.altKey || ev.ctrlKey || ev.metaKey) return; // Don't impede browser functionality
 
-    switch (ev.keyCode) {
-    case 40: // Down
-    case 39: // Right
-    case 32: // Space
-    case 34: // Pg Down
-        lecture.moveSlides(1);
-        break;
-    case 38: // Up
-    case 37: // Left
-    case 33: // Pg Up
-        lecture.moveSlides(-1);
-        break;
-    case 36: // Home
-        lecture.goToSlide(0);
-        break;
-    case 35: // End
-        lecture.goToSlide(Number.POSITIVE_INFINITY);
-        break;
-    default:
-        //console.log(ev.keyCode);
-        return;
-    };
+    if (lecture.keyHooks[ev.keyCode]) {
+        lecture.keyHooks[ev.keyCode](ev);
+    } else {
+        switch (ev.keyCode) {
+        case 40: // Down
+        case 39: // Right
+        case 32: // Space
+        case 34: // Pg Down
+            lecture.moveSlides(1);
+            break;
+        case 38: // Up
+        case 37: // Left
+        case 33: // Pg Up
+            lecture.moveSlides(-1);
+            break;
+        case 36: // Home
+            lecture.goToSlide(0);
+            break;
+        case 35: // End
+            lecture.goToSlide(Number.POSITIVE_INFINITY);
+            break;
+        default:
+            console.log('Unhandled key code: ' + ev.keyCode);
+            return;
+        };
+    }
     ev.preventDefault();
 };
 
@@ -184,10 +209,11 @@ lecture.renderSlide = function(sdata, chapterData) {
     var render = function(d) {
         if (!d) return;
 
-        _assert(d.type, '');
+        _assert(d.type);
         var func = types[d.type];
         _assert(func);
-        return func(d);
+        var node = func(d);
+        return node;
     };
 
     var $contentContainer = $('<div class="lecture_slide_contentContainer">');
@@ -275,8 +301,16 @@ lecture.admin.makeSlideEditable = function($slide) {
 
     _assert(! $slide.attr('data-lecture-editable'));
     $slide.attr({'data-lecture-editable': 'true'});
-    // Disable keys while editing
+    // Global shortcuts in edit mode
     $slide.bind('keydown', function(ev) {
+        switch (ev.keyCode) {
+        case 27: // Esc
+            $slide.find(':focus').blur();
+            lecture.hintStatus('Leaving edit mode');
+            break;
+        }
+
+        // Hide keys from main lecture module while editing
         switch (ev.keyCode) {
         case 32: // Space
         case 40: // Down
@@ -286,21 +320,38 @@ lecture.admin.makeSlideEditable = function($slide) {
         case 37: // Left
         case 36: // Home
         case 35: // End
+        case 69: // E
             ev.stopPropagation();
             break;
         };
     });
-
-    var _makeTextEditable = function($textElement, key) {
-        $textElement.attr({contentEditable: "true"});
-    };
 
     var slideData = lecture.admin._getSlideData($slide);
     var $title = $slide.children('h1');
     if ($title.text() == "") {
         lecture.admin._makePlaceHolder($title, d2p.i18n('Click to set title'));
     }
-    _makeTextEditable($title, 'title');
+    $title.attr({contentEditable: "true"});
+
+    var $contentContainer = $slide.find('.lecture_slide_content');
+    $contentContainer.attr({contentEditable: "true"});
+    $contentContainer.bind('keydown', function(ev) {
+        switch (ev.keyCode) {
+        case 38: // Up
+            // TODO determine position. If at very top, jump to title, and cancel default action
+            break;
+        }
+    });
+};
+
+lecture.admin._enterEditMode = function() {
+    var $slide = $('.lecture_slide_active');
+    $slide.find('h1').focus();
+    console.log('focussed it. please start typing.');
+};
+
+lecture.admin.installKeyHooks = function() {
+    lecture.keyHooks[69 /* E */] = lecture.admin._enterEditMode;
 };
 
 lecture.admin.getBaseURL = function() {
@@ -383,6 +434,7 @@ if (dataEl.length > 0) {
             ]}
         ]}
     ];
+    lecture.admin.installKeyHooks();
     lecture.admin._data = lectureData;
     lecture.admin.displayChapter(lectureData);
 

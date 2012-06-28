@@ -1,3 +1,4 @@
+Esc should unfocus title + content
 edit lists
 tab should indent, shift+tab dedent
 keyboard nav (cursors from title)
@@ -8,10 +9,11 @@ display only one slide at a time
 audio track
 export to static HTML / zip file
 fix printing
-when switching slides in edit mode, 
-indication for edit mode (Present button or so)
+disable spell checking on uninteresting fields
 next and prev slide with mouse application with history API
     don't forget scripts
+Support pasting from LibreOffice (with colors, paragraphs)
+
 correct naming scheme for templates
 Separate frontend from main app
 Show local IP address in LAN tab
@@ -27,7 +29,7 @@ Implement IP multicast bootstrap
 Remove dedicated ProjectManager, should be just called projects
 Add a revision control type on top of ptype
 XSRF protection
-DTN: KDE integration; one action should be "go to URL and make it a d2p drive"
+DTN: KDE integration; one action should be "go to URL and make it a d2p drive" 
 support HEAD requests
 sendQuery should have status notification
 Actually implement cryptographic stuff
