@@ -22,6 +22,15 @@ var _render = function(templateName, context) {
     return Mustache.render(template, context, lecture.templates);
 };
 
+// Utility function to select the whole content of an element
+var _setSelection = function (element) {
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    var range = document.createRange();
+    range.selectNodeContents(element);
+    sel.addRange(range);
+};
+
 lecture.i18n = function(s) {
     return s;
 };
@@ -76,7 +85,7 @@ lecture.hintStatus = function(msg) {
 lecture.keyHooks = {};
 
 lecture._onKeyDown = function(ev) {
-    if (ev.altKey || ev.ctrlKey || ev.metaKey) return; // Don't impede browser functionality
+    if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return; // Don't impede browser functionality
 
     if (lecture.keyHooks[ev.keyCode]) {
         lecture.keyHooks[ev.keyCode](ev);
@@ -320,7 +329,9 @@ lecture.admin.makeSlideEditable = function($slide) {
         case 37: // Left
         case 36: // Home
         case 35: // End
+        case 67: // C
         case 69: // E
+        case 84: // T
             ev.stopPropagation();
             break;
         };
@@ -344,14 +355,29 @@ lecture.admin.makeSlideEditable = function($slide) {
     });
 };
 
-lecture.admin._enterEditMode = function() {
+lecture.admin._enterEditMode = function(initialFocus, callFunc) {
+    if (!initialFocus) initialFocus = 'h1'; // Focus title by default
     var $slide = $('.lecture_slide_active');
-    $slide.find('h1').focus();
-    console.log('focussed it. please start typing.');
+    var $initialFocus = $slide.find(initialFocus);
+    $initialFocus.focus();
+    if (callFunc) {
+        callFunc($initialFocus, $slide);
+    }
+    lecture.hintStatus('Entering edit mode');
 };
 
 lecture.admin.installKeyHooks = function() {
-    lecture.keyHooks[69 /* E */] = lecture.admin._enterEditMode;
+    lecture.keyHooks[69 /* E */] = function() {
+        lecture.admin._enterEditMode();
+    }
+    lecture.keyHooks[67 /* C */] = function() {
+        lecture.admin._enterEditMode('.lecture_slide_content');
+    };
+    lecture.keyHooks[84 /* T */] = function() {
+        lecture.admin._enterEditMode('h1', function($title) {
+            _setSelection($title[0]);
+        });
+    }
 };
 
 lecture.admin.getBaseURL = function() {
