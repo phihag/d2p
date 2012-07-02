@@ -23,13 +23,75 @@ var _render = function(templateName, context) {
 };
 
 // Utility function to select the whole content of an element
-var _setSelection = function (element) {
+var _setSelection = function(element, onlyAtStart) {
     var sel = window.getSelection();
     sel.removeAllRanges();
     var range = document.createRange();
-    range.selectNodeContents(element);
+    if (onlyAtStart) {
+        range.setStart(element, 0);
+        range.setEnd(element, 0);
+        $(element).focus();
+    } else {
+        range.selectNodeContents(element);
+    }
     sel.addRange(range);
 };
+
+var _caretIsOnTop = function(element) {
+    var sel = window.getSelection();
+    var r = sel.getRangeAt(0);
+    if (!r) return false;
+    if (!r.collapsed) return false;
+
+    var firstChildren = new Array();
+    var c = element;
+    while (c) {
+        firstChildren.push(c);
+        c = c.firstChild;
+    }
+
+    var matched = null;
+    for (var j = 0;j < firstChildren.length;j++) {
+        if (firstChildren[j] == r.endContainer) {
+            if (firstChildren[j].nodeType != Node.TEXT_NODE) {
+                return true;
+            }
+
+            // Match in the first line?
+            var marker = document.createElement('span');
+            r.insertNode(marker);
+            var parent = marker.parentElement;
+            var firstCharMarker = document.createElement('span');
+            parent.insertBefore(firstCharMarker, parent.firstChild);
+
+            var firstCharY = $(firstCharMarker).offset().top;
+            var caretY = $(marker).offset().top;
+
+            var before = marker.previousSibling;
+            var after = marker.nextSibling;
+            // Join splitted text nodes
+            if (before && after && (before.nodeType == Node.TEXT_NODE) && (after.nodeType == Node.TEXT_NODE)) {
+                var offsetc = r.startOffset;
+                before.nodeValue += after.nodeValue;
+                parent.removeChild(after);
+
+                // Restore caret position
+                sel.removeAllRanges();
+                var newRange = document.createRange();
+                newRange.setStart(before, offsetc);
+                newRange.setEnd(before, offsetc);
+                sel.addRange(newRange);
+            }
+            parent.removeChild(firstCharMarker);
+            parent.removeChild(marker);
+
+            return firstCharY == caretY;
+        }
+    }
+    
+    return false;
+};
+
 
 lecture.i18n = function(s) {
     return s;
@@ -109,8 +171,7 @@ lecture._onKeyDown = function(ev) {
             lecture.goToSlide(Number.POSITIVE_INFINITY);
             break;
         default:
-            console.log('Unhandled key code: ' + ev.keyCode);
-            return;
+            return; // Ignore unregistered keys
         };
     }
     ev.preventDefault();
@@ -315,7 +376,7 @@ lecture.admin.makeSlideEditable = function($slide) {
         switch (ev.keyCode) {
         case 27: // Esc
             $slide.find(':focus').blur();
-            lecture.hintStatus('Leaving edit mode');
+            lecture.hintStatus('Presentation mode');
             break;
         }
 
@@ -339,17 +400,31 @@ lecture.admin.makeSlideEditable = function($slide) {
 
     var slideData = lecture.admin._getSlideData($slide);
     var $title = $slide.children('h1');
+    var $contentContainer = $slide.find('.lecture_slide_content');
+
     if ($title.text() == "") {
         lecture.admin._makePlaceHolder($title, d2p.i18n('Click to set title'));
     }
     $title.attr({contentEditable: "true"});
+    $title.bind('keydown', function(ev) {
+        switch (ev.keyCode) {
+        case 40: // Down
+            _setSelection($contentContainer[0], true);
+            ev.preventDefault();
+            break;
+        }
+    });
 
-    var $contentContainer = $slide.find('.lecture_slide_content');
     $contentContainer.attr({contentEditable: "true"});
     $contentContainer.bind('keydown', function(ev) {
         switch (ev.keyCode) {
+        case 113: // F2
+            _setSelection($title[0]);
+            break;
         case 38: // Up
-            // TODO determine position. If at very top, jump to title, and cancel default action
+            if (_caretIsOnTop($contentContainer[0])) {
+                _setSelection($title[0]);
+            }
             break;
         }
     });
@@ -363,7 +438,7 @@ lecture.admin._enterEditMode = function(initialFocus, callFunc) {
     if (callFunc) {
         callFunc($initialFocus, $slide);
     }
-    lecture.hintStatus('Entering edit mode');
+    lecture.hintStatus('Edit mode');
 };
 
 lecture.admin.installKeyHooks = function() {
@@ -434,7 +509,7 @@ if (dataEl.length > 0) {
     lectureData['slides'] = [
         {'title': 'First slide',
             content: [
-            {type: 'text', 'text': 'Hier beginnt eine normale Aufzählung'},
+            {type: 'text', 'text': 'Hier beginnt eine normale Aufzählung. Diese Aufzählung ist sehr lang, sie hat viel (manche Leute - bestimmt alles fies, wenn sie so etwas sagen (oder nicht ganz so doll - je nachdem, welche Motivation (einige Forscher sagen auch Hintegrund) - sie haben).'},
             {type: 'list', 'items': [
                 [{'type': "text", "text": "XXXXX"}],
                 [{'type': "text", "text": "Hello"}],
