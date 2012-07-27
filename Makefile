@@ -17,6 +17,8 @@ download-libs:
 
 	./util/getgit.sh git://github.com/janl/mustache.js.git libs/mustache.js
 
+	./util/getgit.sh git://github.com/phihag/osxh.git libs/osxh
+
 clean-libs:
 	rm -rf libs
 

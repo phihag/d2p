@@ -13,6 +13,7 @@ class _LectureProjectHandler(_ProjectHandler):
         self.pdict['showUI'] = True
         self.pdict.setdefault('scripts', []).extend([
             {'src': '/static/lecture/mustache.js'},
+            {'src': '/static/lecture/osxh.js'},
             {'src': '/static/lecture/lecture.js'},
             {'src': '/static/lecture_admin.js'},
         ])

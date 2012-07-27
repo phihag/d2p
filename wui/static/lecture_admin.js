@@ -7,6 +7,8 @@ var lecture = {};
 $(function() {
 var dataEl = $('#lecture_container');
 
+lecture._osxhi = osxh({allowCSS: true});
+
 var _assert = function(b, s, badValues) {
     if (!b) {
         var msg = "Assertion failed" + (s ? ": " + s : "");
@@ -90,6 +92,20 @@ var _caretIsOnTop = function(element) {
     }
     
     return false;
+};
+
+var _findNodeInHierarchy = function(n, tagName, untilNode) {
+    while (n.nodeType != Node.ELEMENT_NODE || n.tagName != tagName) {
+        if (n === untilNode) {
+            return null;
+        }
+        n = n.parentNode;
+        _assert(n);
+        if (n.tagName == 'HTML') {
+            throw new Error('Boundary of document reached');
+        }
+    }
+    return n;
 };
 
 
@@ -259,41 +275,13 @@ lecture.renderSlide = function(sdata, chapterData) {
     $title.text(sdata["title"]);
     $res.append($title);
 
-    var types = {};
-    types.list = function(d) {
-        var ul = document.createElement("ul");
-        _assert(d.items, 'A list must have an "items" property');
-        d.items.forEach(function(its) {
-            var li = document.createElement("li");
-            _assert($.isArray(its), 'List items must consist of a sequence of element descriptions', [its]);
-            its.forEach(function(it) {
-                li.appendChild(render(it));
-            });
-            ul.appendChild(li);
-        });
-        return ul;
-    };
-    types.text = function(d) {
-        return document.createTextNode(d.text);
-    };
-    var render = function(d) {
-        if (!d) return;
-
-        _assert(d.type);
-        var func = types[d.type];
-        _assert(func);
-        var node = func(d);
-        return node;
-    };
+    
 
     var $contentContainer = $('<div class="lecture_slide_contentContainer">');
     var $contentWrapper = $('<div class="lecture_slide_content">');
     if (sdata.content) {
-        _assert ($.isArray(sdata.content), 'content must be an array (or undefined)'); 
-        sdata.content.forEach(function(cdata) {
-            var $content = $(render(cdata));
-            $contentWrapper.append($content);
-        });
+        _assert (typeof sdata.content === 'string', 'content must be an OSXH string'); 
+        lecture._osxhi.renderInto(sdata.content, $contentWrapper);
     }
     $contentContainer.append($contentWrapper);
     $res.append($contentContainer);
@@ -358,11 +346,26 @@ lecture.admin._modifySlideData = function($slide, key, val) {
 };
 
 lecture.admin._makePlaceHolder = function($el, text) {
-    $el.addClass('lecture_admin_placeholder');
-    if (text) {
-        $el.text(text);
-    }
-    // TODO on typing/paste/click, reset text and placeholder
+    var _updateStatus = function(beforeInput) {
+        if ($el.hasClass('lecture_admin_placeholder')) {
+            if (beforeInput) {
+                $el.removeClass('lecture_admin_placeholder');
+                $el.text('');
+            }
+        } else {
+            if ($el.text() == '') {
+                $el.addClass('lecture_admin_placeholder');
+                if (text) {
+                    $el.text(text);
+                }
+            }
+        }
+    };
+    _updateStatus();
+
+    $el.bind('keydown', function() {_updateStatus(true);});
+    $el.bind('keyup', function() {_updateStatus();});
+    $el.bind('blur', function() {_updateStatus();});
 };
 
 /** Called just after slide creation */
@@ -373,10 +376,13 @@ lecture.admin.makeSlideEditable = function($slide) {
     $slide.attr({'data-lecture-editable': 'true'});
     // Global shortcuts in edit mode
     $slide.bind('keydown', function(ev) {
+        if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
+
         switch (ev.keyCode) {
         case 27: // Esc
             $slide.find(':focus').blur();
             lecture.hintStatus('Presentation mode');
+            ev.preventDefault();
             break;
         }
 
@@ -403,10 +409,12 @@ lecture.admin.makeSlideEditable = function($slide) {
     var $contentContainer = $slide.find('.lecture_slide_content');
 
     if ($title.text() == "") {
-        lecture.admin._makePlaceHolder($title, d2p.i18n('Click to set title'));
+        lecture.admin._makePlaceHolder($title, d2p.i18n('Slide title'));
     }
     $title.attr({contentEditable: "true"});
     $title.bind('keydown', function(ev) {
+        if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
+
         switch (ev.keyCode) {
         case 40: // Down
             _setSelection($contentContainer[0], true);
@@ -417,13 +425,159 @@ lecture.admin.makeSlideEditable = function($slide) {
 
     $contentContainer.attr({contentEditable: "true"});
     $contentContainer.bind('keydown', function(ev) {
+        if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
+
+
+        if (ev.shiftKey) {
+            switch (ev.keyCode) {
+            case 9: // Tab
+                break; // Will be handled by standard handler
+            default:
+                return;
+            }
+        }
+
         switch (ev.keyCode) {
-        case 113: // F2
-            _setSelection($title[0]);
+        case 9: // Tab
+            ev.stopPropagation();
+            ev.preventDefault();
+
+            var action = ev.shiftKey ? 'dedent' : 'indent';
+
+            var sel = window.getSelection();
+            if (sel.rangeCount == 0) {
+                lecture.hintStatus('Nothing selected. Cannot ' + action + '.');
+                return;
+            };
+
+            var r = sel.getRangeAt(0);
+            var rsav = {
+                startContainer: r.startContainer,
+                startOffset: r.startOffset,
+                endContainer: r.endContainer,
+                endOffset: r.endOffset
+            };
+            var li = _findNodeInHierarchy(r.startContainer, 'LI', $contentContainer[0]);
+            if (!li) {
+                if (action == 'indent') {
+                    var move = r.startContainer;
+                    if (move == $contentContainer[0]) {
+                        move = document.createTextNode('');
+                        $contentContainer[0].appendChild(move);
+                    }
+                    if (move.nextSibling && move.nextSibling.tagName == 'BR') {
+                        $(move.nextSibling).remove();
+                    }
+
+                    var prevList, nextList;
+                    if (move.previousSibling && move.previousSibling.tagName === 'UL') {
+                        prevList = move.previousSibling;
+                    }
+                    if (move.nextSibling && move.nextSibling.tagName === 'UL') {
+                        nextList = move.nextSibling;
+                    }
+                    if (!prevList && !nextList) {
+                        prevList = document.createElement('ul');
+                        $contentContainer[0].insertBefore(prevList, move.nextSibling);
+                    }
+
+                    var li = document.createElement('li');
+                    li.appendChild(move);
+                    if (prevList) {
+                        $(prevList).append($(li));
+
+                        if (nextList) {
+                            $(nextList).children().each(function (i, node) {
+                                $(prevList).append($(node));
+                            });
+                            $(nextList).remove();
+                        }
+                    } else {
+                        $(nextList).prepend($(li));
+                    }
+                    
+                    sel.removeAllRanges();
+                    var newRange = document.createRange();
+                    newRange.setStart(move, rsav.startOffset);
+                    newRange.setEnd(move, rsav.endOffset);
+                    sel.addRange(newRange);
+                } else {
+                    lecture.hintStatus('Cannot ' + action + ' - outside of any lists');
+                }
+                return;
+            }
+
+            if (action == 'indent') {
+                var newParent = li.previousSibling;
+                if (!newParent) {
+                    // Create a new <li> element at the current level, and make el its child
+                    newParent = document.createElement('li');
+                    li.parentNode.insertBefore(newParent, li);
+
+                    // Allow editing of the new element
+                    var tn = document.createElement('br');
+                    newParent.appendChild(tn);
+                }
+                var ul;
+                if (newParent.lastChild && newParent.lastChild.nodeType == Node.ELEMENT_NODE && newParent.lastChild.tagName == 'UL') {
+                    ul = newParent.lastChild;
+                } else {
+                    ul = document.createElement('ul');
+                    newParent.appendChild(ul);
+                }
+                li.parentNode.removeChild(li);
+                ul.appendChild(li);
+            } else { // dedent
+                var ul = li.parentNode;
+
+                // Move the rest of the list into the current node
+                if (li.nextSibling) {
+                    var bottomUL = document.createElement('ul');
+                    var moveInNew = li.nextSibling;
+                    while (moveInNew) {
+                        ul.removeChild(moveInNew);
+                        bottomUL.appendChild(moveInNew);
+                        moveInNew = moveInNew.nextSibling;
+                    }
+                    li.appendChild(bottomUL);
+                }
+
+                // Reattach node
+                var parentLI = _findNodeInHierarchy(ul.parentNode, 'LI', $contentContainer[0]);
+                ul.removeChild(li);
+                if (parentLI) {
+                    parentLI.parentNode.insertBefore(li, parentLI.nextSibling);
+                } else { // We're a list element at top level
+                    var childrenToMove = [];
+                    for (var i = 0;i < li.childNodes.length;i++) {
+                        childrenToMove.push(li.childNodes[i]);
+                    }
+                    var insertBefore = ul.nextSibling;
+                    childrenToMove.forEach(function(c) {
+                        ul.parentNode.insertBefore(c, insertBefore);
+                    });
+                    /*var br = document.createElement('br');
+                    ul.parentNode.insertBefore(br, ul.nextSibling);*/
+                }
+
+                // Remove list if it's empty now
+                if (ul.childNodes.length == 0) {
+                    ul.parentNode.removeChild(ul);
+                }
+            }
+
+            // Restore range from manual copy (since we've moved DOM elements, r has been corrupted)
+            sel.removeAllRanges();
+            var newRange = document.createRange();
+            newRange.setStart(rsav.startContainer, rsav.startOffset);
+            newRange.setEnd(rsav.endContainer, rsav.endOffset);
+            sel.addRange(newRange);
             break;
         case 38: // Up
             if (_caretIsOnTop($contentContainer[0])) {
-                _setSelection($title[0]);
+                _setSelection($title[0], true);
+                ev.stopPropagation();
+                ev.preventDefault();
             }
             break;
         }
@@ -444,7 +598,7 @@ lecture.admin._enterEditMode = function(initialFocus, callFunc) {
 lecture.admin.installKeyHooks = function() {
     lecture.keyHooks[69 /* E */] = function() {
         lecture.admin._enterEditMode();
-    }
+    };
     lecture.keyHooks[67 /* C */] = function() {
         lecture.admin._enterEditMode('.lecture_slide_content');
     };
@@ -452,7 +606,13 @@ lecture.admin.installKeyHooks = function() {
         lecture.admin._enterEditMode('h1', function($title) {
             _setSelection($title[0]);
         });
-    }
+    };
+    lecture.keyHooks[113 /* F2 */] = function() {
+        lecture.admin._enterEditMode('h1', function($title) {
+            _setSelection($title[0]);
+        });
+    };
+
 };
 
 lecture.admin.getBaseURL = function() {
@@ -506,35 +666,6 @@ if (dataEl.length > 0) {
 
     var dataJSON = dataEl.attr('data-lecture-chapterJSON');
     var lectureData = JSON.parse(dataJSON);
-    lectureData['slides'] = [
-        {'title': 'First slide',
-            content: [
-            {type: 'text', 'text': 'Hier beginnt eine normale Aufzählung. Diese Aufzählung ist sehr lang, sie hat viel (manche Leute - bestimmt alles fies, wenn sie so etwas sagen (oder nicht ganz so doll - je nachdem, welche Motivation (einige Forscher sagen auch Hintegrund) - sie haben).'},
-            {type: 'list', 'items': [
-                [{'type': "text", "text": "XXXXX"}],
-                [{'type': "text", "text": "Hello"}],
-                [{'type': "text", "text": "world"}],
-                [{'type': "text", "text": "Hi"}],
-                [{'type': "text", "text": "This is a"},
-                 {type: 'list', 'items': [
-                    [{'type': "text", "text": "sub"}],
-                    [{'type': "text", "text": "list"},
-                        {type: 'list', items: [
-                            [{'type': "text", "text": "dritte"}],
-                            [{'type': "text", "text": "Ebene"}]
-                        ]}
-                    ]
-                 ]}
-                ]
-            ]}]},
-        {'title': 'Second slide'},
-        {'title': 'Mindest-Verteilungszeit Peer-To-Peer',
-        content: [
-            {type:'list', items:[
-                [{'type': "text", "text": "Dateigröße F(in Bit)"}]
-            ]}
-        ]}
-    ];
     lecture.admin.installKeyHooks();
     lecture.admin._data = lectureData;
     lecture.admin.displayChapter(lectureData);

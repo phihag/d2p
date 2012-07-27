@@ -1,16 +1,13 @@
-edit lists
-tab should indent, shift+tab dedent
 save edited stuff
-new slide
-content format for sublists and stuff
-display only one slide at a time
+
+new slide should start with an empty bullet point
+
 audio track
 export to static HTML / zip file
 fix printing
 disable spell checking on uninteresting fields
 next and prev slide with mouse application with history API
     don't forget scripts
-Support pasting from LibreOffice (with colors, paragraphs)
 
 correct naming scheme for templates
 Separate frontend from main app
