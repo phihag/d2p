@@ -12,7 +12,7 @@ h1.indialog {text-align: center; margin: 0; padding: 0;}
 .commandbar>.commandbutton:first-child{margin-left: 0;}
 .commandbar>.commandbutton_disabled {color: #bbb; background: #eee;}
 
-.button_actions {background: url("icons/actions.png") no-repeat; background-position: 0 center; padding-left: 34px;}
+.button_actions {/*background: url("icons/actions.png") no-repeat; background-position: 0 center;*/ padding-left: 34px;}
 
 #pingResultPanel {position: absolute; right: 1em; bottom: 0em;}
 .pingResults {margin: 0; padding: 0;}

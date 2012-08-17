@@ -1,13 +1,19 @@
-save edited stuff
+lecture
+    audio track
+    export to static HTML / zip file
+    next and prev slide with mouse application with history API
+        don't forget scripts
+    students get to comment on-slide, but not content
+    export to PDF (incl. comments), video
+    presentation mode (fullscreen / multi-screen API)
+    new slide should start with an empty bullet point
+    fix printing
+    fix position of cursor in li
+    indent - outdent should work fluently
+    code editing
+    undo
+    show history, diffs etc.
 
-new slide should start with an empty bullet point
-
-audio track
-export to static HTML / zip file
-fix printing
-disable spell checking on uninteresting fields
-next and prev slide with mouse application with history API
-    don't forget scripts
 
 correct naming scheme for templates
 Separate frontend from main app
@@ -39,10 +45,3 @@ UI:
     clean up actions
 Use mDNS for fallback into local LAN
 ZipFileBased DTN CAS
-
-lecture
-    students get to comment on-slide, but not content
-    export to HTML, PDF (incl. comments), video
-    presentation mode (fullscreen / multi-screen API)
-
-

@@ -60,6 +60,13 @@ body {counter-reset: lecture_slidenum 0;}
     color: #444;
     padding-left: 18px;
 }
+.lecture_slide>footer a {
+    color: inherit !important;
+    text-decoration: none !important;
+}
+.lecture_slide>footer a:hover {
+    text-decoration: underline !important;
+}
 .lecture_footer_slidenum {position: absolute; right: 30px;}
 .lecture_footer_slidenum:after {content: counter(lecture_slidenum);}
 

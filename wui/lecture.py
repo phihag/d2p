@@ -67,6 +67,7 @@ class ChapterHandler(_LectureProjectHandler):
         if not slidesJSON:
             slidesJSON = '[]'
         d['slides'] = json.loads(slidesJSON)
+        assert isinstance(d['slides'], list)
 
         if eId:
             d['_id'] = eId
@@ -97,6 +98,5 @@ def routes(prefix):
         (prefix + r"/", LectureProjectShowHandler),
         (prefix + r"/chapter/", ChapterHandler),
         (prefix + r"/chapter/([0-9a-f]+)/", ChapterHandler),
-        (prefix + r"/chapter/([0-9a-f]+)@([0-9a-f]+)/", ChapterHandler),
     ]
 

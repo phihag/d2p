@@ -90,7 +90,7 @@ var _caretIsOnTop = function(element) {
             return firstCharY == caretY;
         }
     }
-    
+
     return false;
 };
 
@@ -161,8 +161,16 @@ lecture.hintStatus = function(msg) {
 };
 
 lecture.keyHooks = {};
+lecture.prioKeyHooks = {};
 
 lecture._onKeyDown = function(ev) {
+    if (lecture.prioKeyHooks[ev.keyCode]) {
+        var goOn = lecture.prioKeyHooks[ev.keyCode](ev);
+        if (goOn === false) {
+            return false;
+        }
+    }
+
     if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return; // Don't impede browser functionality
 
     if (lecture.keyHooks[ev.keyCode]) {
@@ -271,24 +279,29 @@ lecture.renderSlide = function(sdata, chapterData) {
     _assert(chapterData);
     var $res = $('<div class="lecture_slide">');
 
-    var $title = $("<h1>");
+    var $title = $('<h1 class="lecture_slide_title">');
     $title.text(sdata["title"]);
     $res.append($title);
-
-    
 
     var $contentContainer = $('<div class="lecture_slide_contentContainer">');
     var $contentWrapper = $('<div class="lecture_slide_content">');
     if (sdata.content) {
         _assert (typeof sdata.content === 'string', 'content must be an OSXH string'); 
-        lecture._osxhi.renderInto(sdata.content, $contentWrapper);
+        lecture._osxhi.renderInto(sdata.content, $contentWrapper[0]);
     }
     $contentContainer.append($contentWrapper);
     $res.append($contentContainer);
     
     var $footer = $('<footer>');
     var $footerTitle = $('<span class="lecture_footer_title">');
-    $footerTitle.text(chapterData._lecture.name + ' \u2014 ' + chapterData.name);
+    var $lectureName = $('<span>');
+    if (chapterData._lecture.baseurl) {
+        $lectureName = $('<a>');
+        $lectureName.attr({href: chapterData._lecture.baseurl});
+    }
+    $lectureName.text(chapterData._lecture.name);
+    $footerTitle.append($lectureName);
+    $footerTitle.append($(document.createTextNode(' \u2014 ' + chapterData.name)));
     $footer.append($footerTitle);
     
     var $footerPagenum = $('<span class="lecture_footer_slidenum">');
@@ -319,30 +332,57 @@ lecture.displayChapter = function(chapterData, slideCallback) {
 
 lecture.admin = {};
 
-lecture.admin._getSlideData = function($slide) {
-    _assert($slide.hasClass('lecture_slide'));
-    var res = $slide.data('slideData');
-    _assert(res);
+lecture.admin._assertSaveCorrect = function() {
+    var orig = lecture.admin._data.slides;
+    var saved = lecture.admin._collectSlideData();
+    if (! _.isEqual(orig, saved)) {
+        var saved_json = JSON.stringify(saved, null, 4);
+        var cdata_json = JSON.stringify(orig, null, 4);
+        console.log('Expected: ', cdata_json);
+        console.log('Got: ', saved_json);
+    }
+}
+
+lecture.admin._collectSlideData = function() {
+    var res = [];
+    dataEl.children('.lecture_slide').filter(':not(.lecture_frontSlide)').each(function(i, slide) {
+        var $slide = $(slide);
+        var sdata = {};
+
+        var $title = $slide.find($('.lecture_slide_title'));
+        if (! $title.hasClass('lecture_admin_placeholder')) {
+            sdata.title = $title.text();
+        }
+
+        var $slideContentContainer = $slide.find('.lecture_slide_content');
+        _assert($slideContentContainer.length == 1, 'Found ' + $slideContentContainer.length + ' slide containers (expected one)');
+        var contentNodes = $slideContentContainer[0].childNodes;
+        if (contentNodes.length > 0) {
+            sdata.content = lecture._osxhi.serialize(contentNodes);
+        }
+
+        if ((typeof sdata.title != 'undefined') || (typeof sdata.content != 'undefined')) {
+            res.push(sdata);
+        }
+    });
+
     return res;
 };
 
-lecture.admin._setSlideData = function($slide, sdata) {
-    _assert(sdata);
-    $slide.data('slideData', sdata);
-};
+lecture.admin.save = function() {
+    var sdata = lecture.admin._collectSlideData();
+    var slidesJSON = JSON.stringify(sdata);
+    var ldata = lecture.admin._data;
+    var curl = ldata._lecture.baseurl + 'chapter/' + ldata._id + '/';
+    console.log(curl);
+    var cdata = {
+        name: ldata.name,
+        slidesJSON: slidesJSON
+    };
 
-lecture.admin._modifySlideData = function($slide, key, val) {
-    var keys = key.split('.');
-    _assert(keys.length >= 1);
-    var lastKey = keys.pop();
-    var sdata = lecture.admin._getSlideData($slide);
-    var mdata = sdata;
-    keys.forEach(function(k) {
-       mdata = mdata[k];
-       _assert(mdata);
+    d2p.sendQuery(curl, cdata, function() {
+        lecture.hintStatus('Saved.');
     });
-    mdata[lastKey] = val;
-    lecture.admin._setSlideData($slide, sdata);
 };
 
 lecture.admin._makePlaceHolder = function($el, text) {
@@ -404,8 +444,7 @@ lecture.admin.makeSlideEditable = function($slide) {
         };
     });
 
-    var slideData = lecture.admin._getSlideData($slide);
-    var $title = $slide.children('h1');
+    var $title = $slide.children('.lecture_slide_title');
     var $contentContainer = $slide.find('.lecture_slide_content');
 
     if ($title.text() == "") {
@@ -426,7 +465,6 @@ lecture.admin.makeSlideEditable = function($slide) {
     $contentContainer.attr({contentEditable: "true"});
     $contentContainer.bind('keydown', function(ev) {
         if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
-
 
         if (ev.shiftKey) {
             switch (ev.keyCode) {
@@ -515,7 +553,8 @@ lecture.admin.makeSlideEditable = function($slide) {
                     li.parentNode.insertBefore(newParent, li);
 
                     // Allow editing of the new element
-                    var tn = document.createElement('br');
+                    var tn = document.createElement('span');
+                    tn.setAttribute('class', 'lecture_placeholder');
                     newParent.appendChild(tn);
                 }
                 var ul;
@@ -585,7 +624,7 @@ lecture.admin.makeSlideEditable = function($slide) {
 };
 
 lecture.admin._enterEditMode = function(initialFocus, callFunc) {
-    if (!initialFocus) initialFocus = 'h1'; // Focus title by default
+    if (!initialFocus) initialFocus = '.lecture_slide_title'; // Focus title by default
     var $slide = $('.lecture_slide_active');
     var $initialFocus = $slide.find(initialFocus);
     $initialFocus.focus();
@@ -603,14 +642,22 @@ lecture.admin.installKeyHooks = function() {
         lecture.admin._enterEditMode('.lecture_slide_content');
     };
     lecture.keyHooks[84 /* T */] = function() {
-        lecture.admin._enterEditMode('h1', function($title) {
+        lecture.admin._enterEditMode('.lecture_slide_title', function($title) {
             _setSelection($title[0]);
         });
     };
     lecture.keyHooks[113 /* F2 */] = function() {
-        lecture.admin._enterEditMode('h1', function($title) {
+        lecture.admin._enterEditMode('.lecture_slide_title', function($title) {
             _setSelection($title[0]);
         });
+    };
+
+    lecture.prioKeyHooks[83 /* S */] = function(e) {
+        if (e.ctrlKey) {
+            e.preventDefault();
+            lecture.admin.save();
+            return false;
+        }
     };
 
 };
@@ -622,14 +669,12 @@ lecture.admin.getBaseURL = function() {
 lecture.admin.makeNewSlide = function() {
     var slideData = {};
     var $slide = lecture.renderSlide(slideData, lecture.admin._data);
-    lecture.admin._setSlideData($slide, slideData);
     lecture.admin.makeSlideEditable($slide);
     dataEl.append($slide);
 };
 
 lecture.admin.displayChapter = function(chapterData) {
     lecture.displayChapter(chapterData, function($slide, sdata) {
-        lecture.admin._setSlideData($slide, sdata);
         lecture.admin.makeSlideEditable($slide);
     });
 };
