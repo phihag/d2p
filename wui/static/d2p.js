@@ -12,9 +12,9 @@ checkBrowser: function() {
     if (typeof JSON == 'undefined') {
         alert("This browser does not support JSON");
     }
-    if (typeof WebSocket == 'undefined') {
+    /*if (typeof WebSocket == 'undefined') {
         alert("This browser does not support websockets");
-    }
+    }*/
     if (typeof window.localStorage == 'undefined') {
         alert("This browser does not support local storage");
     }
