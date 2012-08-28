@@ -5,6 +5,26 @@
 
 var lecture = {};
 $(function() {
+var _KEYS = {
+    TAB: 9,
+    ESC: 27,
+    SPACE: 32,
+    PGUP: 33,
+    PGDOWN: 34,
+    END: 35,
+    HOME: 36,
+    LEFT: 37,
+    UP: 38,
+    RIGHT: 39,
+    DOWN: 40,
+    C: 67,
+    E: 69,
+    O: 79,
+    S: 83,
+    T: 84,
+    F2: 113
+};
+
 var dataEl = $('#lecture_container');
 
 lecture._osxhi = osxh({allowCSS: true});
@@ -177,21 +197,21 @@ lecture._onKeyDown = function(ev) {
         lecture.keyHooks[ev.keyCode](ev);
     } else {
         switch (ev.keyCode) {
-        case 40: // Down
-        case 39: // Right
-        case 32: // Space
-        case 34: // Pg Down
+        case _KEYS.DOWN:
+        case _KEYS.RIGHT:
+        case _KEYS.SPACE:
+        case _KEYS.PGDOWN:
             lecture.moveSlides(1);
             break;
-        case 38: // Up
-        case 37: // Left
-        case 33: // Pg Up
+        case _KEYS.UP:
+        case _KEYS.LEFT:
+        case _KEYS.PGUP:
             lecture.moveSlides(-1);
             break;
-        case 36: // Home
+        case _KEYS.HOME:
             lecture.goToSlide(0);
             break;
-        case 35: // End
+        case _KEYS.END:
             lecture.goToSlide(Number.POSITIVE_INFINITY);
             break;
         default:
@@ -374,7 +394,6 @@ lecture.admin.save = function() {
     var slidesJSON = JSON.stringify(sdata);
     var ldata = lecture.admin._data;
     var curl = ldata._lecture.baseurl + 'chapter/' + ldata._id + '/';
-    console.log(curl);
     var cdata = {
         name: ldata.name,
         slidesJSON: slidesJSON
@@ -419,7 +438,7 @@ lecture.admin.makeSlideEditable = function($slide) {
         if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
 
         switch (ev.keyCode) {
-        case 27: // Esc
+        case _KEYS.ESC:
             $slide.find(':focus').blur();
             lecture.hintStatus('Presentation mode');
             ev.preventDefault();
@@ -428,17 +447,17 @@ lecture.admin.makeSlideEditable = function($slide) {
 
         // Hide keys from main lecture module while editing
         switch (ev.keyCode) {
-        case 32: // Space
-        case 40: // Down
-        case 39: // Right
-        case 32: // Space
-        case 38: // Up
-        case 37: // Left
-        case 36: // Home
-        case 35: // End
-        case 67: // C
-        case 69: // E
-        case 84: // T
+        case _KEYS.SPACE:
+        case _KEYS.DOWN:
+        case _KEYS.RIGHT:
+        case _KEYS.SPACE:
+        case _KEYS.UP:
+        case _KEYS.LEFT:
+        case _KEYS.HOME:
+        case _KEYS.END:
+        case _KEYS.C:
+        case _KEYS.E:
+        case _KEYS.T:
             ev.stopPropagation();
             break;
         };
@@ -455,7 +474,7 @@ lecture.admin.makeSlideEditable = function($slide) {
         if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
 
         switch (ev.keyCode) {
-        case 40: // Down
+        case _KEYS.DOWN:
             _setSelection($contentContainer[0], true);
             ev.preventDefault();
             break;
@@ -464,11 +483,26 @@ lecture.admin.makeSlideEditable = function($slide) {
 
     $contentContainer.attr({contentEditable: "true"});
     $contentContainer.bind('keydown', function(ev) {
+        if (ev.ctrlKey) {
+            if (ev.keyCode == _KEYS.O) { // Advanced options
+                var selNodes = lecture.admin._getSelectedNodes($contentContainer);
+                console.log(selNodes);
+                selNodes.forEach(function(n) {
+                    // TODO if not element, then wrap in a span
+                    
+                });
+
+                ev.stopPropagation();
+                ev.preventDefault();
+                return;
+            }
+        }
+
         if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
 
         if (ev.shiftKey) {
             switch (ev.keyCode) {
-            case 9: // Tab
+            case _KEYS.TAB: // Tab
                 break; // Will be handled by standard handler
             default:
                 return;
@@ -476,7 +510,7 @@ lecture.admin.makeSlideEditable = function($slide) {
         }
 
         switch (ev.keyCode) {
-        case 9: // Tab
+        case _KEYS.TAB:
             ev.stopPropagation();
             ev.preventDefault();
 
@@ -612,7 +646,7 @@ lecture.admin.makeSlideEditable = function($slide) {
             newRange.setEnd(rsav.endContainer, rsav.endOffset);
             sel.addRange(newRange);
             break;
-        case 38: // Up
+        case _KEYS.UP:
             if (_caretIsOnTop($contentContainer[0])) {
                 _setSelection($title[0], true);
                 ev.stopPropagation();
@@ -635,24 +669,24 @@ lecture.admin._enterEditMode = function(initialFocus, callFunc) {
 };
 
 lecture.admin.installKeyHooks = function() {
-    lecture.keyHooks[69 /* E */] = function() {
+    lecture.keyHooks[_KEYS.E] = function() {
         lecture.admin._enterEditMode();
     };
-    lecture.keyHooks[67 /* C */] = function() {
+    lecture.keyHooks[_KEYS.C] = function() {
         lecture.admin._enterEditMode('.lecture_slide_content');
     };
-    lecture.keyHooks[84 /* T */] = function() {
+    lecture.keyHooks[_KEYS.T] = function() {
         lecture.admin._enterEditMode('.lecture_slide_title', function($title) {
             _setSelection($title[0]);
         });
     };
-    lecture.keyHooks[113 /* F2 */] = function() {
+    lecture.keyHooks[_KEYS.F2] = function() {
         lecture.admin._enterEditMode('.lecture_slide_title', function($title) {
             _setSelection($title[0]);
         });
     };
 
-    lecture.prioKeyHooks[83 /* S */] = function(e) {
+    lecture.prioKeyHooks[_KEYS.S] = function(e) {
         if (e.ctrlKey) {
             e.preventDefault();
             lecture.admin.save();
