@@ -10,4 +10,6 @@ sys.path.append(_ROOTDIR)
 import d2p
 sys.path.remove(_ROOTDIR)
 
-d2p.main()
+if __name__ == '__main__':
+    d2p.main()
+
