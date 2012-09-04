@@ -91,7 +91,7 @@ class P2PTransport(object):
 
             connection.setblocking(0)
             ios = tornado.iostream.IOStream(connection, self._io_loop)
-            self._onNewIOStream(ios)
+            self._onNewIOStream(ios, address)
 
     @property
     def endpoints(self):
