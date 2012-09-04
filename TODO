@@ -1,5 +1,14 @@
 lecture
+    images
+    templates
+        task
+    size
+    code format
+    insert new slide with ins
+    delete slide with shift + del
+    absolute position of images
     audio track
+    double save should be noop
     export to static HTML / zip file
     next and prev slide with mouse application with history API
         don't forget scripts
@@ -13,6 +22,8 @@ lecture
     code editing
     undo
     show history, diffs etc.
+    markdown mode (over multiple slides)
+    <F2> while focussing text 
 
 
 correct naming scheme for templates
