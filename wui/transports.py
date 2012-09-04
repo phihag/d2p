@@ -126,5 +126,5 @@ class P2PManualBootstrapHandler(TemplatingHandler): # Add and configure a manual
         bse = d2p.core.bootstrap.BootstrapEntry(*args)
 
         bs.ui_addEntry(bse)
-        self.write({'_status': added})
+        self.write({'_status': 'added'})
 

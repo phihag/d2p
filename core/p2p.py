@@ -10,20 +10,26 @@ from . import bootstrap
 _MSG_HEADER = b'D2P_MSG:'
 
 class P2PEndpoint(object):
-    def __init__(self, iostream, netCore, io_loop):
+    def __init__(self, iostream, netCore, io_loop, remoteAddr):
+        assert iostream
         self._iostream = iostream
         self._netCore = netCore
         self._io_loop = io_loop
         self._io_loop.add_callback(self._read)
+        self._remoteAddr = remoteAddr
 
     @property
     def ui_localPort(self):
-        return self._iostream.socket.getsockname()[1]
+        return self._remoteAddr[1]
 
     @property
     def ui_remoteAddrStr(self):
-        pn = self._iostream.socket.getpeername()
+        pn = self._remoteAddr
         return pn[0] + ':' + str(pn[1])
+
+    @property
+    def remoteAddr(self):
+        return self._remoteAddr
 
     def _read(self):
         HEADER_LEN = len(_MSG_HEADER) + 8
@@ -106,8 +112,9 @@ class P2PTransport(object):
         if bse.transportId != self.transport_id:
             return # We don't support that type of connections
 
-        # We're just connecting to anything we can find
-        self._connectTo(bse.addr, bse.port)
+        # Are we connected to this host already?
+        if not any((bse.addr, bse.port) == ep.remoteAddr for ep in self.endpoints):
+            self._connectTo(bse.addr, bse.port)
 
     def _connectTo(self, addr, port):
         family, socktype, proto, canonname, sockaddr = socket.getaddrinfo(addr, port, socket.AF_INET6, socket.SOCK_STREAM)[0]
@@ -115,10 +122,10 @@ class P2PTransport(object):
         s.setblocking(0)
         ios = tornado.iostream.IOStream(s, self._io_loop)
 
-        ios.connect(sockaddr, functools.partial(self._onNewIOStream, ios))
+        ios.connect(sockaddr, functools.partial(self._onNewIOStream, ios, (addr, port)))
 
-    def _onNewIOStream(self, ios):
-        ep = P2PEndpoint(ios, self._netCore, self._io_loop)
+    def _onNewIOStream(self, ios, remoteAddr):
+        ep = P2PEndpoint(ios, self._netCore, self._io_loop, remoteAddr)
         self._endpoints.append(ep)
         self._netCore.transport_onNewEndpoint(self, ep)
 
