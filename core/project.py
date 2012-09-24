@@ -2,6 +2,7 @@
 import base64
 import collections
 import hashlib
+import io
 import json
 import os.path
 import random
@@ -77,7 +78,7 @@ class Project(object):
             'publicKey_b64': base64.b64encode(self._publicKey).decode('ASCII'),
             'secAlgorithm': self._secAlgorithm
         }
-        with open(os.path.join(sdir, 'header'), 'w', encoding='utf-8') as headerf:
+        with io.open(os.path.join(sdir, 'header'), 'w', encoding='utf-8') as headerf:
             json.dump(header, headerf)
 
         if self._privateKey:
@@ -88,7 +89,7 @@ class Project(object):
 
     @staticmethod
     def _def_load(sdir):
-        with open(os.path.join(sdir, 'header'), 'r', encoding='utf-8') as headerf:
+        with io.open(os.path.join(sdir, 'header'), 'r', encoding='utf-8') as headerf:
             header = json.load(headerf)
 
         privateKey = None
